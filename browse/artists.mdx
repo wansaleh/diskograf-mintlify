@@ -1,71 +1,66 @@
 ---
 title: "Browse and Discover Malaysian Artists on Diskograf"
 sidebarTitle: "Artists"
-description: "Find any Malaysian artist's complete discography, credits, and profile on Diskograf. Filter by genre, decade, and more."
+description: "Find Malaysian artists, filter the directory, and explore each artist's songs and credit roles on Diskograf."
 ---
 
-Diskograf brings together the full creative history of Malaysian music under one roof. Whether you're tracing the decades-long career of a legend or discovering an emerging act, every artist in the catalogue has a dedicated profile page where you can explore their releases, roles, and collaborators.
+Diskograf brings together the creative history of Malaysian music. The Artists page is a searchable directory, and each artist profile includes the songs and roles associated with that artist.
 
-## Finding an Artist
+## Find an artist
 
-There are three ways to get to an artist on Diskograf.
+There are three ways to get to an artist:
 
-- **Browse the artist listing** — Head to [diskograf.com/artists](https://diskograf.com/artists) for a full, scrollable directory of every artist in the catalogue.
-- **Search from the nav bar** — Type an artist's name into the search bar from any page. Use the `artist:` filter to scope your results directly to artists — for example, `artist:yuna` — and the matching profile will appear at the top of your results.
-- **Navigate directly by URL** — If you know the artist's ID or slug, go straight to their page using the pattern `diskograf.com/artist/{id}-{slug}`. For example, Siti Nurhaliza's profile lives at [diskograf.com/artist/2-siti-nurhaliza](https://diskograf.com/artist/2-siti-nurhaliza).
+- **Browse the artist directory** — Open [Artists](https://diskograf.com/artists) and search the catalogue.
+- **Search from the header** — Use the site search to search artist names and aliases.
+- **Open a profile directly** — Unclaimed artist profiles use `diskograf.com/artist/{id}-{slug}`. When an artist profile is linked to a member account, the canonical public URL is `diskograf.com/{username}` and the old artist URL redirects there.
 
-## Artist Profile Pages
+## Filter the artist directory
 
-An artist's profile page is the single most complete view of their presence in Malaysian music. Here's what you'll find:
+The directory supports:
 
-<CardGroup cols={2}>
-  <Card title="Profile & Bio" icon="user" href="https://diskograf.com/artists">
-    A profile photo, biographical overview, and genre tags that place the artist in context.
-  </Card>
-  <Card title="Full Discography" icon="music" href="/browse/songs">
-    Every song in the catalogue where the artist has a credited role, paginated and sortable.
-  </Card>
-  <Card title="Credit Roles" icon="pen-line" href="/contribute/credits">
-    Credits are broken out by role — singer, composer, lyricist, producer, and more — so you can see exactly how an artist contributed to each release.
-  </Card>
-  <Card title="Related Artists" icon="users" href="/browse/artists">
-    Collaborators and associated acts surface naturally through shared credits.
-  </Card>
-</CardGroup>
+- Keyword search
+- Credit-role filtering
+- **Verified** or **Unclaimed** status filtering
+- **Band** or **Solo** type filtering
+- Sorting by name or song count
+- Pagination
 
-### Navigating the Discography
+Use the filters together to narrow the directory to the artists you need.
 
-When an artist's discography spans multiple pages, you can move through them quickly using your keyboard:
+## Artist profile pages
 
-- **Left / Right arrow keys** — jump one page at a time
-- **Shift + Left / Right arrow keys** — jump ten pages at a time
+An artist profile can include:
 
-This makes it fast to scan through deep catalogues without reaching for the mouse.
+- Profile image, name, aliases, and biography
+- Group or solo status, location, and social links when available
+- Genre breakdown
+- Full discography with credited roles
+- Associated acts and collaborators when available
 
-## Genre Filtering
+### Filter an artist's works
 
-Every artist page supports genre filtering, letting you narrow the discography down to the style you're interested in. Select a genre from the tab bar on the artist's page, or append the `?genre=` parameter directly to the URL.
+The works grid can be narrowed by:
+
+- Credit role
+- One or more genres
+- Keyword search
+
+You can also sort works by latest or oldest release, YouTube views, views per day, trending order, title, or catalogue order. The results are paginated, and active filters are reflected in the URL.
+
+For example:
 
 ```text
 diskograf.com/artist/{id}-{slug}?genre=ballad
 ```
 
-For example, to view only ballad releases on Siti Nurhaliza's page:
+## Artist aliases
+
+Artists can be known by a stage name, shortened name, alternate romanisation, or another alias. Diskograf indexes aliases so that searching for a known variant can lead to the same artist profile.
+
+For multi-word names, use quotes in the search filter:
 
 ```text
-diskograf.com/artist/2-siti-nurhaliza?genre=ballad
+artist:"siti nurhaliza"
 ```
 
-Genre tags are assigned at the song level, so the filter reflects the full range of styles an artist has worked across throughout their career.
-
-## Artist Aliases
-
-Many Malaysian artists are known by more than one name — a full name, a shortened stage name, a romanised spelling, or an older name used earlier in their career. Diskograf cross-references these aliases so that a search for any known variant surfaces the correct profile.
-
-You don't need to know the exact canonical name to find an artist. If an alias exists in the system, it will resolve to the right page.
-
-<Tip>
-  When searching for an artist with a multi-word name, wrap the name in quotes to make sure Diskograf treats it as a single term: `artist:"siti nurhaliza"`. Without quotes, each word is treated as a separate search token and your results may be broader than expected.
-</Tip>
-
-For the full search syntax — including how to combine artist filters with year, decade, and label filters — see the [Search reference](/browse/search).
+See the [Search reference](/browse/search) for the full search syntax.

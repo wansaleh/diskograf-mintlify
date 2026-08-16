@@ -1,39 +1,44 @@
 ---
 title: "The Diskograf Contributor Community"
 sidebarTitle: "Contributors"
-description: "See who's building the Diskograf catalogue. Browse the community of contributors, view leaderboards, and follow the work behind every credit."
+description: "Browse Diskograf members, see public activity, and explore the people building the Malaysian music catalogue."
 ---
 
-Every song, credit, and artist profile on Diskograf is there because someone added it. The Contributors section is where you can see who's doing that work, browse the community, and get a sense of how the catalogue is growing.
+Every song, credit, and artist profile on Diskograf is there because someone added or maintained it. The Contributors page shows the public community around that work.
 
-## The Contributors Directory
+## The contributor overview
 
-Open the Contributors page from the main navigation to browse everyone who has contributed to Diskograf. You can search by name and sort the list by activity or by when someone joined.
+The top of the Contributors page includes:
 
-Each entry links to a public profile showing:
+- **Archive Pulse** — public member and recent-contribution totals
+- **Active People** — members with recent activity
+- **All-time leaderboard** — members with the highest contribution totals
 
-- The contributor's display name, username, and profile photo.
-- Their public contribution history.
-- Any artist profile they've claimed, if applicable.
+These sections are followed by the contributor directory.
 
-## Contributor Leaderboards
+## The contributor directory
 
-The community overview surfaces public leaderboards for recent activity, so you can see who has been most active in a given window. This is intended as a way to recognise the people keeping the catalogue current, not as a competition.
+Search the directory by display name or username. You can filter the results by:
 
-Leaderboards only include public contributions. Private profile edits and personal library changes are never counted.
+- **Everyone**
+- **Fans**
+- **Artists**
+- **Contributors**
 
-## Contribution History on Profiles
+Use the sort control to order results by recent activity, newest members, contribution count, or name. The directory is paginated.
 
-Every contributor profile has a public contributions view listing the songs and artists they've touched, in reverse chronological order. This is the same data available through the [Public API](/developers/api) under `/v1/users/:username/contributions`.
+Each entry links to a public profile showing the member's display name, username, profile image, public activity, Loved Songs, and linked artist identity when one exists.
 
-See [Contribution History](/account/contribution-history) for what appears on your own profile and how it's presented.
+## Public activity and contribution history
 
-## Becoming a Contributor
+Public profiles show an **Activity** view, not a public management grid. A profile owner can open **Manage contributions** to search and edit the songs they added or helped edit. Pending songs remain private to the owner while they are under review.
 
-Any registered Diskograf account can contribute. There's no application process and no tiered role system for editors, only a single expectation: contribute accurately, cite where you can, and treat the catalogue as something other people rely on.
+The [Public API](/developers/public-api) also provides a paginated contribution-history endpoint for public profiles.
+
+## Becoming a contributor
+
+Any registered Diskograf account can contribute. Sign in with Google, complete onboarding, and use **Add a song**, **Suggest an edit**, or **Claim credit** when the relevant action is available.
+
+New songs go through review before they appear in the public catalogue. Published edits are attributed to your account and recorded in activity.
 
 Start with [How to Contribute](/contribute/overview) if you're new.
-
-<Note>
-  If you'd rather stay anonymous while contributing, keep your username generic and your profile photo blank. Your contributions will still be credited to your account, but nothing on your profile identifies you outside Diskograf.
-</Note>

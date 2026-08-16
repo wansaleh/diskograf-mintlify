@@ -1,47 +1,40 @@
 ---
-title: "Track Your Contribution History and Activity on Diskograf"
+title: "View Your Activity and Manage Contributions on Diskograf"
 sidebarTitle: "Contribution History"
-description: "See every song you have added, credit you have edited, and change you have made to the Diskograf catalogue from your own profile."
+description: "Understand the difference between your public activity, your private song-management view, and songs that are still under review."
 ---
 
-Every edit you make to Diskograf is attributed to you and shown on your profile. Your contribution history is a running record of the work you have done on the catalogue, useful for tracking your own activity and for helping the community trust the data.
+Diskograf attributes catalogue changes to the account that made them. Your public profile shows an activity feed, while a separate private view helps you manage songs you added or helped edit.
 
-## Where to Find It
+## Public activity
 
-Sign in and open your profile at `diskograf.com/:your-username`. You will see a **Contributions** tab alongside your other profile sections. Anyone viewing your public profile can also see this history.
+Open `diskograf.com/{username}/activity` to see the public activity feed for a profile. It can include changes such as:
 
-## What Gets Tracked
+- Adding or removing a song credit
+- Changing a song title, release date, artwork, lyrics, notes, genre, label, or streaming link
+- Adding or editing a song
 
-Diskograf records the meaningful edits you make to the catalogue, including:
+The activity feed identifies the affected song and the type of change. Other visitors can view the activity feed on a public profile.
 
-- Songs you add.
-- Credits you add, change, or remove.
-- Artist profiles you create or update.
-- Label information you add or correct.
-- Genre tags you apply.
+## Manage your songs
 
-Each entry is timestamped and links back to the song, artist, or label you edited, so you can jump straight to what you changed.
+Open `diskograf.com/{username}/contributions` while signed in to manage your own catalogue submissions. This view is private to the profile owner. It includes songs you added or helped edit, with tools to:
 
-## Reading the Timeline
+- Search by song, artist, label, or year
+- Filter by **Pending** or **Published**
+- Sort by edited, released, added, or title order
+- Open a song and continue editing it
 
-Contributions are shown in reverse chronological order, newest first. Each entry shows:
+The route is a management view, not a public contribution timeline.
 
-- **What** was changed (for example, "added credit", "updated artist name", "added song").
-- **Where** the change was made, as a link to the affected page.
-- **When** the change happened.
+## Songs under review
 
-You can page through older activity to see your full history back to the day you joined.
+New songs are private while they are under review. Open the **Under Review** view on your own profile to find pending submissions. Pending songs can be edited, but other visitors cannot use that view to browse them.
 
-## Contributions on Other Profiles
+When a song becomes public, it appears in the catalogue and in the credited artists' works.
 
-Contribution history is public. Visiting another contributor's profile shows the same timeline for their activity, which is the primary way Diskograf keeps community edits accountable and visible.
+## Song activity
 
-If you want to see who has worked on a specific song, open that song's page and look at its contributor timeline. It shows every contributor who has touched the record and when.
+Song pages can show contribution activity for changes made to that record. For a machine-readable version of public contribution history, use the [Public API](/developers/public-api).
 
-## Reverting or Correcting a Change
-
-Diskograf does not currently expose a one-click revert. If you notice a change (yours or someone else's) that needs to be corrected, edit the affected record directly and note the correction. For persistent disagreements, reach out via the [Contact](/support/contact) page.
-
-<Note>
-  Because contribution history is public and permanent, treat every edit as your byline. Care with data is what keeps the catalogue trustworthy.
-</Note>
+Every edit is a public byline once the affected record is public. Check your source and role before you save a change.

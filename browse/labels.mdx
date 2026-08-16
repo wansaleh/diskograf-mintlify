@@ -1,76 +1,40 @@
 ---
 title: "Browse and Discover Malaysian Record Labels on Diskograf"
 sidebarTitle: "Labels"
-description: "Explore Malaysian record labels on Diskograf, including full company names, release counts, active status, and the artists they represent."
+description: "Explore Malaysian record labels on Diskograf, including company details, release counts, status, and songs."
 ---
 
-Behind every Malaysian song is a label that believed in it enough to release it. Diskograf catalogues the full landscape of Malaysian record labels — from major imprints with hundreds of releases to independent operations that defined a generation — so you can explore the music industry from the business end as well as the artistic one.
+Diskograf gives each record label a page where you can inspect its catalogue and basic company information.
 
-## Label Pages
+## Label pages
 
-Each record label in the Diskograf catalogue has its own profile page at `diskograf.com/label/{id}-{slug}`. For example, Rocketfuel Entertainment's page lives at [diskograf.com/label/153-rocketfuel-entertainment](https://diskograf.com/label/153-rocketfuel-entertainment).
+Each label has a page at `diskograf.com/label/{id}-{slug}`. A label page can show:
 
-A label page brings together everything Diskograf knows about that imprint:
+- **Trading name** and logo, when available
+- **Legal company name**
+- **Release count** for songs associated with the label
+- **Status**, including whether the label is marked defunct
+- **Songs** released under the label
 
-<CardGroup cols={2}>
-  <Card title="Identity" icon="building" href="https://diskograf.com/labels">
-    The label's trading name, full legal company name, and logo where available.
-  </Card>
+The page does not currently include a separate artist roster. Use [Artists](/browse/artists) to browse artist profiles.
 
-  <Card title="Status" icon="circle-dot" href="https://diskograf.com/labels">
-    Whether the label is currently active or defunct — useful context when tracing an artist's career across different eras.
-  </Card>
+## Search and filter label songs
 
-  <Card title="Release Count" icon="record-vinyl" href="https://diskograf.com/labels">
-    A running total of every song in the catalogue released under that label, giving you a sense of scale at a glance.
-  </Card>
+The song grid on a label page supports:
 
-  <Card title="Artist Roster" icon="users" href="/browse/artists">
-    The artists associated with the label through their catalogued releases, linking directly to their profile pages.
-  </Card>
-</CardGroup>
+- Keyword search
+- Genre filtering
+- Sorting by release date, YouTube views, trend, title, or catalogue order
+- Pagination
 
-## Notable Labels
-
-The Diskograf catalogue spans a wide range of Malaysian labels, from multinational majors to homegrown independents. A few you'll encounter frequently:
-
-| Label | Notes |
-| --- | --- |
-| **Rocketfuel Entertainment Sdn Bhd** | One of the most represented labels in the catalogue, with 290\+ releases. Home to major Malaysian acts across pop, rock, and nasyid. |
-| **Sony Music Entertainment** | The Malaysian arm of the global major, with a deep back catalogue of mainstream pop and rock releases. |
-| **MFMF Records** | An independent label with a distinctive roster in the local scene. |
-| **Suria Records** | A significant independent voice in Malaysian music, particularly across the nasyid and Malay pop genres. |
-| **Arteffects** | Known for releases spanning multiple genres and generations of Malaysian artists. |
-| **Padu Records** | A notable label in the Malaysian rock and alternative catalogue. |
-
-Browse the full label listing at [diskograf.com/labels](https://diskograf.com/labels) to explore every label in the catalogue.
-
-## Searching by Label
-
-You can filter your song search by label directly from the search bar using the `label:` filter (shorthand: `l:`). This scopes your results to songs released under that label.
+You can also search the catalogue by label with the `label:` filter (shorthand: `l:`):
 
 ```text
 label:sony
 ```
 
 ```text
-l:rocketfuel
+l:rocketfuel decade:1990
 ```
 
-You can also combine the label filter with other search terms. For example, to find ballads released on Suria Records:
-
-```text
-ballad label:suria
-```
-
-Or to find all releases from a label in a specific decade:
-
-```text
-label:arteffects decade:1990
-```
-
-See the [Search reference](/browse/search) for the full list of available filters and how to combine them.
-
-<Tip>
-  Label names in the search filter support partial matches — you don't need to type the full company name. Searching `l:rocket` will surface results from Rocketfuel Entertainment without needing to type the complete name.
-</Tip>
+See the [Search reference](/browse/search) for the full list of search filters.
