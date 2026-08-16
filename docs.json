@@ -84,18 +84,6 @@
         ]
       },
       {
-        "tab": "Policies",
-        "groups": [
-          {
-            "group": "Legal",
-            "pages": [
-              "policies/terms",
-              "policies/privacy"
-            ]
-          }
-        ]
-      },
-      {
         "tab": "API Reference",
         "openapi": "openapi.json",
         "groups": [
@@ -165,6 +153,18 @@
             "pages": [
               "developers/data-licensing",
               "developers/sharing"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Policies",
+        "groups": [
+          {
+            "group": "Legal",
+            "pages": [
+              "policies/terms",
+              "policies/privacy"
             ]
           }
         ]
