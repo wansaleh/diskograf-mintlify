@@ -74,14 +74,6 @@
             ]
           },
           {
-            "group": "Developers",
-            "pages": [
-              "developers/public-api",
-              "developers/data-licensing",
-              "developers/sharing"
-            ]
-          },
-          {
             "group": "Support",
             "pages": [
               "changelog",
@@ -99,6 +91,19 @@
             "pages": [
               "policies/terms",
               "policies/privacy"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Developers",
+        "groups": [
+          {
+            "group": "Developers",
+            "pages": [
+              "developers/public-api",
+              "developers/data-licensing",
+              "developers/sharing"
             ]
           }
         ]
