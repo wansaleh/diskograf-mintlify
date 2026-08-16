@@ -83,6 +83,7 @@
           {
             "group": "Support",
             "pages": [
+              "changelog",
               "support/contact",
               "support/accessibility"
             ]

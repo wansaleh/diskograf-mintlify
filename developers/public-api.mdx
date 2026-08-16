@@ -16,9 +16,9 @@ All routes live under `/v1`. `GET /v1` returns a route index, and `GET /health` 
 
 ## Access and Limits
 
-The API is currently open. There are no keys, no accounts, and no signup step to get started. A per-IP rate limit of roughly 20 requests every 10 seconds is applied at the network edge. Bursting above that returns HTTP `429` with a `Retry-After` header, and normal traffic resumes as soon as the window passes.
+The API is currently open. There are no keys, no accounts, and no signup step to get started. Production traffic is rate-limited at the network edge. If you exceed the active limit, the API can return HTTP `429` with a `Retry-After` header. Treat the limit as an operational safeguard rather than a guaranteed quota.
 
-Only published, non-deleted songs and non-banned, claimed user profiles are visible through the API.
+Only published, non-deleted songs and public member profiles with usernames are visible through the API. Banned members are excluded. A member profile may include a linked artist profile, but an artist link is not required for the member to appear.
 
 ## Response Shape
 

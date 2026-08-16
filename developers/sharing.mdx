@@ -13,12 +13,13 @@ Diskograf URLs follow predictable patterns. You can construct them by hand or co
 | Resource | Pattern | Example |
 | --- | --- | --- |
 | Song | `/song/:songId` | `https://diskograf.com/song/12345` |
-| Artist | `/artist/:artistId` | `https://diskograf.com/artist/589` |
+| Unclaimed artist | `/artist/:artistId` | `https://diskograf.com/artist/589` |
+| Linked artist profile | `/:username` | `https://diskograf.com/norlisa` |
 | Label | `/label/:labelId` | `https://diskograf.com/label/42` |
 | Genre | `/genre/:slug` | `https://diskograf.com/genre/pop` |
 | User profile | `/:username` | `https://diskograf.com/norlisa` |
 
-Canonical URLs are stable. Ids never change, and slug changes redirect from the old URL, so a link you share today keeps working.
+Canonical URLs are stable. IDs do not change, and slug changes redirect from the old URL. When an artist profile is linked to a member account, the canonical URL is the member's username path and the old `/artist/...` path redirects there.
 
 ## Social Preview Cards
 
