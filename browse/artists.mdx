@@ -1,0 +1,71 @@
+---
+title: "Browse and Discover Malaysian Artists on Diskograf"
+sidebarTitle: "Artists"
+description: "Find any Malaysian artist's complete discography, credits, and profile on Diskograf. Filter by genre, decade, and more."
+---
+
+Diskograf brings together the full creative history of Malaysian music under one roof. Whether you're tracing the decades-long career of a legend or discovering an emerging act, every artist in the catalogue has a dedicated profile page where you can explore their releases, roles, and collaborators.
+
+## Finding an Artist
+
+There are three ways to get to an artist on Diskograf.
+
+- **Browse the artist listing** — Head to [diskograf.com/artists](https://diskograf.com/artists) for a full, scrollable directory of every artist in the catalogue.
+- **Search from the nav bar** — Type an artist's name into the search bar from any page. Use the `artist:` filter to scope your results directly to artists — for example, `artist:yuna` — and the matching profile will appear at the top of your results.
+- **Navigate directly by URL** — If you know the artist's ID or slug, go straight to their page using the pattern `diskograf.com/artist/{id}-{slug}`. For example, Siti Nurhaliza's profile lives at [diskograf.com/artist/2-siti-nurhaliza](https://diskograf.com/artist/2-siti-nurhaliza).
+
+## Artist Profile Pages
+
+An artist's profile page is the single most complete view of their presence in Malaysian music. Here's what you'll find:
+
+<CardGroup cols={2}>
+  <Card title="Profile & Bio" icon="user">
+    A profile photo, biographical overview, and genre tags that place the artist in context.
+  </Card>
+  <Card title="Full Discography" icon="music">
+    Every song in the catalogue where the artist has a credited role, paginated and sortable.
+  </Card>
+  <Card title="Credit Roles" icon="pen-line">
+    Credits are broken out by role — singer, composer, lyricist, producer, and more — so you can see exactly how an artist contributed to each release.
+  </Card>
+  <Card title="Related Artists" icon="users">
+    Collaborators and associated acts surface naturally through shared credits.
+  </Card>
+</CardGroup>
+
+### Navigating the Discography
+
+When an artist's discography spans multiple pages, you can move through them quickly using your keyboard:
+
+- **Left / Right arrow keys** — jump one page at a time
+- **Shift + Left / Right arrow keys** — jump ten pages at a time
+
+This makes it fast to scan through deep catalogues without reaching for the mouse.
+
+## Genre Filtering
+
+Every artist page supports genre filtering, letting you narrow the discography down to the style you're interested in. Select a genre from the tab bar on the artist's page, or append the `?genre=` parameter directly to the URL.
+
+```
+diskograf.com/artist/{id}-{slug}?genre=ballad
+```
+
+For example, to view only ballad releases on Siti Nurhaliza's page:
+
+```
+diskograf.com/artist/2-siti-nurhaliza?genre=ballad
+```
+
+Genre tags are assigned at the song level, so the filter reflects the full range of styles an artist has worked across throughout their career.
+
+## Artist Aliases
+
+Many Malaysian artists are known by more than one name — a full name, a shortened stage name, a romanised spelling, or an older name used earlier in their career. Diskograf cross-references these aliases so that a search for any known variant surfaces the correct profile.
+
+You don't need to know the exact canonical name to find an artist. If an alias exists in the system, it will resolve to the right page.
+
+<Tip>
+  When searching for an artist with a multi-word name, wrap the name in quotes to make sure Diskograf treats it as a single term: `artist:"siti nurhaliza"`. Without quotes, each word is treated as a separate search token and your results may be broader than expected.
+</Tip>
+
+For the full search syntax — including how to combine artist filters with year, decade, and label filters — see the [Search reference](/browse/search).

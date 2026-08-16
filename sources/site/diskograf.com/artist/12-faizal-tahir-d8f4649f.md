@@ -1,0 +1,9 @@
+# Source: https://diskograf.com/artist/12-faizal-tahir?genre=pop
+
+Search cheatsheet
+
+`song title`Words without a filter`artist:siti`Artist name (or a:)`artist:"siti nurhaliza"`Multi-word value, quoted`label:sony`Record label (or l:)`year:2020`Exact release year (or y:)`decade:1990`Any year in the decade (or d:)
+
+Combine terms, for example `cinta artist:siti decade:2000`
+
+Latest released

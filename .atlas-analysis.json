@@ -1,0 +1,95 @@
+{
+  "projectType": "saas",
+  "projectName": "Diskograf",
+  "projectDescription": "Diskograf is a community-powered music credits database for Malaysian music, letting fans, artists, and industry professionals discover, document, and verify the people and stories behind every song.",
+  "theme": "willow",
+  "primaryColor": "#046cfc",
+  "lightColor": "#7ab4fc",
+  "darkColor": "#040404",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "accounts"
+            ]
+          },
+          {
+            "group": "Browsing the Catalogue",
+            "pages": [
+              "browse/artists",
+              "browse/songs",
+              "browse/labels",
+              "browse/search"
+            ]
+          },
+          {
+            "group": "Contributing",
+            "pages": [
+              "contribute/overview",
+              "contribute/adding-songs",
+              "contribute/credits",
+              "contribute/artist-profiles"
+            ]
+          },
+          {
+            "group": "Artist Identity",
+            "pages": [
+              "identity/claiming-profile",
+              "identity/verification",
+              "identity/impersonation"
+            ]
+          },
+          {
+            "group": "Account & Settings",
+            "pages": [
+              "account/profile",
+              "account/loved-songs",
+              "account/privacy"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Policies",
+        "groups": [
+          {
+            "group": "Legal",
+            "pages": [
+              "policies/terms",
+              "policies/privacy"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Searchable catalogue of Malaysian songs, artists, and record labels",
+    "Detailed song credits — composers, lyricists, producers, performers",
+    "Artist profile pages with full discography and genre filtering",
+    "Label pages with full release counts and company information",
+    "Community contributions — fans and industry members can add and correct credits",
+    "Artist identity claims — verified artists can own their catalogue profile",
+    "Curated lists built by editors and contributors",
+    "Advanced search with filters for artist, label, year, decade, and genre",
+    "Changelog of platform improvements and new features"
+  ],
+  "publicApiSurface": [
+    "Search syntax: song title (plain text), artist: / a:, label: / l:, year: / y:, decade: / d:",
+    "Artist pages: /artist/{id}-{slug}",
+    "Song pages: /song/{id}-{slug}",
+    "Label pages: /label/{id}-{slug}",
+    "User profile pages: /{username}",
+    "Catalogue browsing: /songs, /artists, /labels",
+    "Changelog: /changelog",
+    "Curated lists with artwork",
+    "Genre filtering on artist pages",
+    "Artist identity claim / impersonation reporting"
+  ]
+}
