@@ -96,10 +96,10 @@
         ]
       },
       {
-        "tab": "Developers",
+        "tab": "API Reference",
         "groups": [
           {
-            "group": "Developers",
+            "group": "API Reference",
             "pages": [
               "developers/public-api",
               "developers/data-licensing",
