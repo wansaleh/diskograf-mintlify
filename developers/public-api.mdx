@@ -1,0 +1,143 @@
+---
+title: "The Diskograf Public API for Malaysian Music Data"
+sidebarTitle: "Public API"
+description: "A read-only REST API giving developers stable JSON access to the Diskograf catalogue of Malaysian songs, artists, labels, and credits."
+---
+
+Diskograf publishes a small, read-only REST API so developers, researchers, and journalists can build on the catalogue without scraping the site. Every endpoint reads the same data the website renders, so responses stay in sync with what you see on `diskograf.com`.
+
+## Base URL
+
+```text
+https://api.diskograf.com
+```
+
+All routes live under `/v1`. `GET /v1` returns a route index, and `GET /health` pings the database.
+
+## Access and Limits
+
+The API is currently open. There are no keys, no accounts, and no signup step to get started. A per-IP rate limit of roughly 20 requests every 10 seconds is applied at the network edge. Bursting above that returns HTTP `429` with a `Retry-After` header, and normal traffic resumes as soon as the window passes.
+
+Only published, non-deleted songs and non-banned, claimed user profiles are visible through the API.
+
+## Response Shape
+
+List endpoints return a `data` array and a `meta` object with pagination information.
+
+```json
+{
+  "data": [ ... ],
+  "meta": { "total": 20144, "limit": 20, "offset": 0 }
+}
+```
+
+Detail endpoints return a single `data` object with no `meta`.
+
+```json
+{ "data": { ... } }
+```
+
+Errors always return a structured envelope with a stable `code`.
+
+```json
+{ "error": { "code": "not_found", "message": "Song not found." } }
+```
+
+| Code | HTTP status | Meaning |
+| --- | --- | --- |
+| `bad_request` | 400 | The request was malformed or a parameter was invalid |
+| `not_found` | 404 | No resource matched the identifier |
+| `rate_limited` | 429 | Too many requests. Retry after the interval in `Retry-After` |
+| `internal_error` | 500 | Something went wrong on the server |
+
+## Endpoints
+
+### Songs
+
+| Route | Notes |
+| --- | --- |
+| `GET /v1/songs` | Supports `q`, `genre`, `role`, `artist_id`, `label_id`, `sort`, `order`, `limit`, `offset` |
+| `GET /v1/songs/:songId` | Full credits, genres, and labels for a single song |
+| `GET /v1/songs/:songId/similar` | Split into `by_artist` and `by_others` |
+| `GET /v1/songs/:songId/contributors` | Public contributor timeline for a song |
+
+Song objects in listing responses include `youtube_video_id` and `youtube_video_url`. Both are `null` when no YouTube video is linked.
+
+### Artists
+
+| Route | Notes |
+| --- | --- |
+| `GET /v1/artists` | Supports `q`, `letter`, `role`, `status`, `band`, `sort`, `order`, `limit`, `offset` |
+| `GET /v1/artists/:artistId` | Profile with role counts and genre counts |
+| `GET /v1/artists/:artistId/songs` | Same song filters (`q`, `genre`, `role`, `sort`, `order`, `limit`, `offset`) |
+| `GET /v1/artists/namesake-hints?ids=` | Batch disambiguation hints for same-named artists |
+
+`status` accepts `user` or `not-user`. `ids` on the namesake route accepts 1 to 200 positive integer ids, either repeated or comma-separated.
+
+### Genres
+
+| Route | Notes |
+| --- | --- |
+| `GET /v1/genres` | Full genre list, not paginated |
+| `GET /v1/genres/:slug` | Single genre |
+| `GET /v1/genres/:slug/songs` | Songs in a genre, with `q`, `role`, `sort`, `order`, `limit`, `offset` |
+
+### Labels
+
+| Route | Notes |
+| --- | --- |
+| `GET /v1/labels` | Supports `q`, `sort`, `order`, `limit`, `offset` |
+| `GET /v1/labels/:labelId` | Single label |
+| `GET /v1/labels/:labelId/songs` | Songs on a label, with `q`, `genre`, `sort`, `order`, `limit`, `offset` |
+
+### Users
+
+| Route | Notes |
+| --- | --- |
+| `GET /v1/users` | Supports `q`, `filter`, `sort`, `limit`, `offset` |
+| `GET /v1/users/overview` | Public member counts and contributor leaderboards |
+| `GET /v1/users/:username` | Addressed by username, not by numeric id |
+| `GET /v1/users/:username/contributions` | Paginated public contribution history |
+| `GET /v1/users/:username/songs` | Songs credited to the user (404 when not a credited artist) |
+
+### Search and Reference
+
+| Route | Notes |
+| --- | --- |
+| `GET /v1/roles` | List of credit roles used in the catalogue |
+| `GET /v1/search?q=` | Songs, artists, and labels in a single call |
+| `GET /v1/stats` | Public catalogue totals |
+
+## Parameter Conventions
+
+- `genre` and `role` accept repeats or commas. `?genre=pop&genre=ballad` and `?genre=pop,ballad` are equivalent.
+- `limit` and `offset` follow standard pagination. Combine with `meta.total` to page through results.
+- `sort` and `order` are validated against a per-route allow-list. Invalid values return `bad_request`.
+
+## Examples
+
+Search songs by keyword:
+
+```sh
+curl -s 'https://api.diskograf.com/v1/songs?q=hujan&limit=5' | jq
+```
+
+Page through an artist's discography:
+
+```sh
+curl -s 'https://api.diskograf.com/v1/artists/589/songs?limit=10&offset=10' | jq
+```
+
+Fetch a genre with its songs:
+
+```sh
+curl -s 'https://api.diskograf.com/v1/genres/pop/songs?limit=20' | jq
+```
+
+## Stability
+
+The `/v1` prefix is a stability promise. Breaking changes will happen under a new version prefix rather than by modifying `/v1` in place. Additive changes (new optional fields, new endpoints) can appear at any time.
+
+<Note>
+  The API is intentionally read-only. Contributions still go through the Diskograf website and require an account. See [Contributing](/contribute/overview) for how to add or correct data.
+</Note>

@@ -1,0 +1,43 @@
+---
+title: "Sharing Diskograf Links, Previews, and Embed Images"
+sidebarTitle: "Sharing Links"
+description: "Every Diskograf song, artist, and label has a stable URL and a rich social preview card. Here is how to share them and what to expect."
+---
+
+Every song, artist, genre, and label on Diskograf has a stable, canonical URL you can share anywhere. When posted on social platforms, chat apps, or messaging services, most links unfurl into rich preview cards with a generated image, title, and description.
+
+## Canonical URLs
+
+Diskograf URLs follow predictable patterns. You can construct them by hand or copy from the browser's address bar.
+
+| Resource | Pattern | Example |
+| --- | --- | --- |
+| Song | `/song/:songId` | `https://diskograf.com/song/12345` |
+| Artist | `/artist/:artistId` | `https://diskograf.com/artist/589` |
+| Label | `/label/:labelId` | `https://diskograf.com/label/42` |
+| Genre | `/genre/:slug` | `https://diskograf.com/genre/pop` |
+| User profile | `/:username` | `https://diskograf.com/norlisa` |
+
+Canonical URLs are stable. Ids never change, and slug changes redirect from the old URL, so a link you share today keeps working.
+
+## Social Preview Cards
+
+Song pages come with a dynamically generated Open Graph preview card. When you paste a song link into WhatsApp, X, Facebook, LinkedIn, Bluesky, Discord, or a similar service, the platform fetches the card and shows it in place of the plain link.
+
+The card includes the song title, primary artist, release year, and cover artwork where available. It is generated on demand and cached at the edge, so the first request may take slightly longer than subsequent ones.
+
+Artist and label pages also expose standard Open Graph metadata (title, description, and a representative image) so link previews stay readable on any platform.
+
+## Sharing From the Site
+
+You do not have to type or copy URLs by hand. On any catalogue page, use your browser's share menu or copy the address directly. The URL you copy is already the canonical one.
+
+## Tips
+
+- **Deep-linking to filtered views.** Search and filter states on browse pages are reflected in the URL. If you share a link from a filtered browse page, the recipient lands on the same view.
+- **Refreshing a stale preview.** If a social platform has cached an older version of a preview card, most platforms provide a debugger (for example, Facebook's Sharing Debugger) that lets you request a fresh fetch.
+- **Embedding in articles.** For long-form articles or research, prefer linking to the specific song, artist, or label rather than a search results URL. Detail pages are the most stable references.
+
+<Note>
+  Preview cards are generated for the public catalogue only. Private pages, drafts, and reports do not produce shareable previews.
+</Note>
