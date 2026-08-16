@@ -51,6 +51,7 @@
             "pages": [
               "contribute/overview",
               "contribute/adding-songs",
+              "contribute/editing-songs",
               "contribute/credits",
               "contribute/artist-profiles",
               "contribute/history"
