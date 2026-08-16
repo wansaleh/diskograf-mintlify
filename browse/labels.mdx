@@ -1,5 +1,5 @@
 ---
-title: "Discover Malaysian Record Labels on Diskograf"
+title: "Browse and Discover Malaysian Record Labels on Diskograf"
 sidebarTitle: "Labels"
 description: "Explore Malaysian record labels on Diskograf, including full company names, release counts, active status, and the artists they represent."
 ---
@@ -13,16 +13,16 @@ Each record label in the Diskograf catalogue has its own profile page at `diskog
 A label page brings together everything Diskograf knows about that imprint:
 
 <CardGroup cols={2}>
-  <Card title="Identity" icon="building">
+  <Card title="Identity" icon="building" href="https://diskograf.com/labels">
     The label's trading name, full legal company name, and logo where available.
   </Card>
-  <Card title="Status" icon="circle-dot">
+  <Card title="Status" icon="circle-dot" href="https://diskograf.com/labels">
     Whether the label is currently active or defunct — useful context when tracing an artist's career across different eras.
   </Card>
-  <Card title="Release Count" icon="disc">
+  <Card title="Release Count" icon="disc" href="https://diskograf.com/labels">
     A running total of every song in the catalogue released under that label, giving you a sense of scale at a glance.
   </Card>
-  <Card title="Artist Roster" icon="users">
+  <Card title="Artist Roster" icon="users" href="/browse/artists">
     The artists associated with the label through their catalogued releases, linking directly to their profile pages.
   </Card>
 </CardGroup>
@@ -46,23 +46,23 @@ Browse the full label listing at [diskograf.com/labels](https://diskograf.com/la
 
 You can filter your song search by label directly from the search bar using the `label:` filter (shorthand: `l:`). This scopes your results to songs released under that label.
 
-```
+```text
 label:sony
 ```
 
-```
+```text
 l:rocketfuel
 ```
 
 You can also combine the label filter with other search terms. For example, to find ballads released on Suria Records:
 
-```
+```text
 ballad label:suria
 ```
 
 Or to find all releases from a label in a specific decade:
 
-```
+```text
 label:arteffects decade:1990
 ```
 

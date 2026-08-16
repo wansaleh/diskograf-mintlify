@@ -19,16 +19,16 @@ There are three ways to get to an artist on Diskograf.
 An artist's profile page is the single most complete view of their presence in Malaysian music. Here's what you'll find:
 
 <CardGroup cols={2}>
-  <Card title="Profile & Bio" icon="user">
+  <Card title="Profile & Bio" icon="user" href="https://diskograf.com/artists">
     A profile photo, biographical overview, and genre tags that place the artist in context.
   </Card>
-  <Card title="Full Discography" icon="music">
+  <Card title="Full Discography" icon="music" href="/browse/songs">
     Every song in the catalogue where the artist has a credited role, paginated and sortable.
   </Card>
-  <Card title="Credit Roles" icon="pen-line">
+  <Card title="Credit Roles" icon="pen-line" href="/contribute/credits">
     Credits are broken out by role — singer, composer, lyricist, producer, and more — so you can see exactly how an artist contributed to each release.
   </Card>
-  <Card title="Related Artists" icon="users">
+  <Card title="Related Artists" icon="users" href="/browse/artists">
     Collaborators and associated acts surface naturally through shared credits.
   </Card>
 </CardGroup>
@@ -46,13 +46,13 @@ This makes it fast to scan through deep catalogues without reaching for the mous
 
 Every artist page supports genre filtering, letting you narrow the discography down to the style you're interested in. Select a genre from the tab bar on the artist's page, or append the `?genre=` parameter directly to the URL.
 
-```
+```text
 diskograf.com/artist/{id}-{slug}?genre=ballad
 ```
 
 For example, to view only ballad releases on Siti Nurhaliza's page:
 
-```
+```text
 diskograf.com/artist/2-siti-nurhaliza?genre=ballad
 ```
 
