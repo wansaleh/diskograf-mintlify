@@ -3,10 +3,13 @@
   "name": "Diskograf",
   "theme": "aspen",
   "logo": {
-    "light": "https://media.brand.dev/f502fb13-9694-4197-99d1-897d55b76d87.svg",
-    "dark": "https://media.brand.dev/f502fb13-9694-4197-99d1-897d55b76d87.svg"
+    "light": "/images/logo/diskograf-horizontal.svg",
+    "dark": "/images/logo/diskograf-horizontal-dark.svg"
   },
-  "favicon": "https://media.brand.dev/602ae5d5-5dc1-48c9-b47f-952ca6b645cd.png",
+  "favicon": {
+    "light": "/images/logo/diskograf-icon-light.svg",
+    "dark": "/images/logo/diskograf-icon-dark.svg"
+  },
   "colors": {
     "primary": "#046cfc",
     "light": "#7ab4fc",
