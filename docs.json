@@ -97,11 +97,72 @@
       },
       {
         "tab": "API Reference",
+        "openapi": "openapi.json",
         "groups": [
           {
             "group": "API Reference",
+            "pages": ["developers/public-api"]
+          },
+          {
+            "group": "Songs",
             "pages": [
-              "developers/public-api",
+              "GET /v1/songs",
+              "GET /v1/songs/{songId}",
+              "GET /v1/songs/{songId}/similar",
+              "GET /v1/songs/{songId}/contributors"
+            ]
+          },
+          {
+            "group": "Artists",
+            "pages": [
+              "GET /v1/artists",
+              "GET /v1/artists/namesake-hints",
+              "GET /v1/artists/{artistId}",
+              "GET /v1/artists/{artistId}/songs"
+            ]
+          },
+          {
+            "group": "Genres",
+            "pages": [
+              "GET /v1/genres",
+              "GET /v1/genres/{slug}",
+              "GET /v1/genres/{slug}/songs"
+            ]
+          },
+          {
+            "group": "Labels",
+            "pages": [
+              "GET /v1/labels",
+              "GET /v1/labels/{labelId}",
+              "GET /v1/labels/{labelId}/songs"
+            ]
+          },
+          {
+            "group": "Users",
+            "pages": [
+              "GET /v1/users",
+              "GET /v1/users/overview",
+              "GET /v1/users/{username}",
+              "GET /v1/users/{username}/contributions",
+              "GET /v1/users/{username}/songs"
+            ]
+          },
+          {
+            "group": "Search",
+            "pages": ["GET /v1/search"]
+          },
+          {
+            "group": "Meta",
+            "pages": [
+              "GET /health",
+              "GET /v1",
+              "GET /v1/roles",
+              "GET /v1/stats"
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
               "developers/data-licensing",
               "developers/sharing"
             ]
