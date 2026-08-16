@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "name": "Diskograf",
-  "theme": "aspen",
+  "theme": "maple",
   "logo": {
     "light": "/images/logo/diskograf-horizontal.svg",
     "dark": "/images/logo/diskograf-horizontal-dark.svg"
