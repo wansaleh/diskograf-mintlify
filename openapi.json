@@ -286,7 +286,7 @@
           "Search"
         ],
         "summary": "Search the catalogue",
-        "description": "Cross-category keyword search over songs, artists and labels. The same search that backs the site header.",
+        "description": "Cross-category keyword search over songs, artists and labels — the same search that backs the site header, including artist:/label:/year:/decade: filters and \"quoted phrase\" literal matching.",
         "parameters": [
           {
             "name": "q",
@@ -295,7 +295,30 @@
             "schema": {
               "type": "string"
             },
-            "description": "The keyword. Required, and capped in length."
+            "description": "The keyword. Required, and capped in length. Supports artist:/label:/year:/decade: filters and \"quoted phrase\" literals, same as the site search."
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "songs",
+                "artists"
+              ]
+            },
+            "description": "Limit results to one category. `songs`/`artists` return an empty array for the other two. Labels are only ever returned for scope=all (or when omitted), matching the site search."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            },
+            "description": "Max rows per category in scope. Omit for the default per-category caps (songs: 50, labels: 20, artists: 30)."
           }
         ],
         "responses": {
