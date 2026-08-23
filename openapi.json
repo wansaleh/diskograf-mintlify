@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Diskograf API",
-    "description": "A public, read-only REST API over the Diskograf catalogue of Malaysian music.\n\nNo authentication is required and no endpoint writes. Requests are rate limited\nto 60 per 60 seconds per IP address.\n\nEvery successful response is wrapped in an envelope. List endpoints return\n`{ \"data\": [...], \"meta\": { \"total\", \"limit\", \"offset\" } }`; detail endpoints\nreturn `{ \"data\": {...} }`. Errors return `{ \"error\": { \"code\", \"message\" } }`.",
+    "description": "A public, read-only REST API over the Diskograf catalogue of Malaysian music.\n\nNo authentication is required and no endpoint writes. Requests are rate limited\nto 120 per 60 seconds per IP address.\n\nEvery successful response is wrapped in an envelope. List endpoints return\n`{ \"data\": [...], \"meta\": { \"total\", \"limit\", \"offset\" } }`; detail endpoints\nreturn `{ \"data\": {...} }`. Errors return `{ \"error\": { \"code\", \"message\" } }`.",
     "version": "1.0.0"
   },
   "servers": [
@@ -286,7 +286,7 @@
           "Search"
         ],
         "summary": "Search the catalogue",
-        "description": "Cross-category keyword search over songs, artists and labels — the same search that backs the site header, including artist:/label:/year:/decade: filters and \"quoted phrase\" literal matching.",
+        "description": "Cross-category keyword search over songs, artists and labels. The same search that backs the site header. Callable only from diskograf.com (Origin/Referer checked) — this is the one route meant for direct browser calls from the site itself, not third-party use.",
         "parameters": [
           {
             "name": "q",
@@ -295,30 +295,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The keyword. Required, and capped in length. Supports artist:/label:/year:/decade: filters and \"quoted phrase\" literals, same as the site search."
-          },
-          {
-            "name": "scope",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "all",
-                "songs",
-                "artists"
-              ]
-            },
-            "description": "Limit results to one category. `songs`/`artists` return an empty array for the other two. Labels are only ever returned for scope=all (or when omitted), matching the site search."
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 50
-            },
-            "description": "Max rows per category in scope. Omit for the default per-category caps (songs: 50, labels: 20, artists: 30)."
+            "description": "The keyword. Required, and capped in length."
           }
         ],
         "responses": {
@@ -392,6 +369,30 @@
                                   }
                                 ]
                               },
+                              "youtube_views": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_views_per_day": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
                               "artists": {
                                 "type": "array",
                                 "items": {
@@ -423,6 +424,8 @@
                               "artwork_source",
                               "youtube_video_id",
                               "youtube_video_url",
+                              "youtube_views",
+                              "youtube_views_per_day",
                               "artists"
                             ]
                           }
@@ -562,6 +565,9 @@
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "description": "Origin/Referer is not diskograf.com."
           }
         }
       }
@@ -737,6 +743,24 @@
             "description": "Restrict to songs released on this label."
           },
           {
+            "name": "released_from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Inclusive release-date lower bound (yyyy-MM-dd)."
+          },
+          {
+            "name": "released_to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Inclusive release-date upper bound (yyyy-MM-dd)."
+          },
+          {
             "name": "sort",
             "in": "query",
             "schema": {
@@ -846,6 +870,30 @@
                               }
                             ]
                           },
+                          "youtube_views": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "youtube_views_per_day": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
                           "artists": {
                             "type": "array",
                             "items": {
@@ -877,6 +925,8 @@
                           "artwork_source",
                           "youtube_video_id",
                           "youtube_video_url",
+                          "youtube_views",
+                          "youtube_views_per_day",
                           "artists"
                         ]
                       }
@@ -1286,6 +1336,30 @@
                                   }
                                 ]
                               },
+                              "youtube_views": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_views_per_day": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
                               "artists": {
                                 "type": "array",
                                 "items": {
@@ -1317,6 +1391,129 @@
                               "artwork_source",
                               "youtube_video_id",
                               "youtube_video_url",
+                              "youtube_views",
+                              "youtube_views_per_day",
+                              "artists"
+                            ]
+                          }
+                        },
+                        "by_writers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "slug": {
+                                "type": "string",
+                                "description": "URL-safe form of the title. Not unique — pair it with the id."
+                              },
+                              "released_at": {
+                                "type": "string"
+                              },
+                              "artwork_url": {
+                                "type": "string",
+                                "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
+                              },
+                              "artwork_source": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": [
+                                      "Custom",
+                                      "Apple Music",
+                                      "Spotify",
+                                      "YouTube"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_video_id": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_video_url": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_views": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_views_per_day": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "artists": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name"
+                                  ]
+                                },
+                                "description": "Primary performing credits only, in credit order."
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "title",
+                              "slug",
+                              "released_at",
+                              "artwork_url",
+                              "artwork_source",
+                              "youtube_video_id",
+                              "youtube_video_url",
+                              "youtube_views",
+                              "youtube_views_per_day",
                               "artists"
                             ]
                           }
@@ -1381,6 +1578,30 @@
                                   }
                                 ]
                               },
+                              "youtube_views": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_views_per_day": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
                               "artists": {
                                 "type": "array",
                                 "items": {
@@ -1412,6 +1633,8 @@
                               "artwork_source",
                               "youtube_video_id",
                               "youtube_video_url",
+                              "youtube_views",
+                              "youtube_views_per_day",
                               "artists"
                             ]
                           }
@@ -1419,6 +1642,7 @@
                       },
                       "required": [
                         "by_artist",
+                        "by_writers",
                         "by_others"
                       ]
                     }
@@ -1864,6 +2088,19 @@
                               }
                             ],
                             "description": "The claimed account handle, if any. Internal numeric user ids are never exposed."
+                          },
+                          "country": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "is_deceased": {
+                            "type": "boolean"
                           }
                         },
                         "required": [
@@ -1878,7 +2115,9 @@
                           "first_release_year",
                           "last_release_year",
                           "avatar_url",
-                          "username"
+                          "username",
+                          "country",
+                          "is_deceased"
                         ]
                       }
                     },
@@ -2588,6 +2827,30 @@
                               }
                             ]
                           },
+                          "youtube_views": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "youtube_views_per_day": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
                           "artists": {
                             "type": "array",
                             "items": {
@@ -2619,6 +2882,8 @@
                           "artwork_source",
                           "youtube_video_id",
                           "youtube_video_url",
+                          "youtube_views",
+                          "youtube_views_per_day",
                           "artists"
                         ]
                       }
@@ -2989,6 +3254,30 @@
                               }
                             ]
                           },
+                          "youtube_views": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "youtube_views_per_day": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
                           "artists": {
                             "type": "array",
                             "items": {
@@ -3020,6 +3309,8 @@
                           "artwork_source",
                           "youtube_video_id",
                           "youtube_video_url",
+                          "youtube_views",
+                          "youtube_views_per_day",
                           "artists"
                         ]
                       }
@@ -3402,6 +3693,30 @@
                               }
                             ]
                           },
+                          "youtube_views": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "youtube_views_per_day": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
                           "artists": {
                             "type": "array",
                             "items": {
@@ -3433,6 +3748,8 @@
                           "artwork_source",
                           "youtube_video_id",
                           "youtube_video_url",
+                          "youtube_views",
+                          "youtube_views_per_day",
                           "artists"
                         ]
                       }
@@ -3913,6 +4230,30 @@
                                       }
                                     ]
                                   },
+                                  "youtube_views": {
+                                    "anyOf": [
+                                      {
+                                        "type": "integer",
+                                        "minimum": -9007199254740991,
+                                        "maximum": 9007199254740991
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "youtube_views_per_day": {
+                                    "anyOf": [
+                                      {
+                                        "type": "integer",
+                                        "minimum": -9007199254740991,
+                                        "maximum": 9007199254740991
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
                                   "artists": {
                                     "type": "array",
                                     "items": {
@@ -3944,6 +4285,8 @@
                                   "artwork_source",
                                   "youtube_video_id",
                                   "youtube_video_url",
+                                  "youtube_views",
+                                  "youtube_views_per_day",
                                   "artists"
                                 ]
                               },
@@ -4339,6 +4682,30 @@
                               }
                             ]
                           },
+                          "youtube_views": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "youtube_views_per_day": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
                           "artists": {
                             "type": "array",
                             "items": {
@@ -4370,6 +4737,8 @@
                           "artwork_source",
                           "youtube_video_id",
                           "youtube_video_url",
+                          "youtube_views",
+                          "youtube_views_per_day",
                           "artists"
                         ]
                       }
