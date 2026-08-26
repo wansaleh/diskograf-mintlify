@@ -2134,6 +2134,19 @@
                               }
                             ]
                           },
+                          "role_songs": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Songs credited in the requested role filter. Null when no role filter is active."
+                          },
                           "total_credits": {
                             "anyOf": [
                               {
@@ -2223,6 +2236,7 @@
                           "prefix_title",
                           "is_group",
                           "total_songs",
+                          "role_songs",
                           "total_credits",
                           "disambiguator",
                           "first_release_year",
@@ -3093,6 +3107,17 @@
                               }
                             ]
                           },
+                          "image_url": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Absolute CDN URL for the genre artwork."
+                          },
                           "song_count": {
                             "type": "integer",
                             "minimum": -9007199254740991,
@@ -3104,6 +3129,7 @@
                           "slug",
                           "title",
                           "color",
+                          "image_url",
                           "song_count"
                         ]
                       }
@@ -4228,7 +4254,7 @@
           "Users"
         ],
         "summary": "List a member's contributions",
-        "description": "The member's public contribution history, newest first.",
+        "description": "The member's public contribution history, newest first. Edit rows include safe display-only change details.",
         "parameters": [
           {
             "name": "username",
@@ -4282,6 +4308,143 @@
                           },
                           "action_at": {
                             "type": "string"
+                          },
+                          "details": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "added_credits": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "artist_name": {
+                                          "anyOf": [
+                                            {
+                                              "type": "string"
+                                            },
+                                            {
+                                              "type": "null"
+                                            }
+                                          ]
+                                        },
+                                        "role_name": {
+                                          "anyOf": [
+                                            {
+                                              "type": "string"
+                                            },
+                                            {
+                                              "type": "null"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "artist_name",
+                                        "role_name"
+                                      ]
+                                    }
+                                  },
+                                  "removed_credits": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "artist_name": {
+                                          "anyOf": [
+                                            {
+                                              "type": "string"
+                                            },
+                                            {
+                                              "type": "null"
+                                            }
+                                          ]
+                                        },
+                                        "role_name": {
+                                          "anyOf": [
+                                            {
+                                              "type": "string"
+                                            },
+                                            {
+                                              "type": "null"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "artist_name",
+                                        "role_name"
+                                      ]
+                                    }
+                                  },
+                                  "changed_genres": {
+                                    "type": "boolean"
+                                  },
+                                  "changed_labels": {
+                                    "type": "boolean"
+                                  },
+                                  "changed_lyrics": {
+                                    "type": "boolean"
+                                  },
+                                  "changed_notes": {
+                                    "type": "boolean"
+                                  },
+                                  "changed_title": {
+                                    "type": "boolean"
+                                  },
+                                  "changed_release_date": {
+                                    "type": "boolean"
+                                  },
+                                  "changed_artwork": {
+                                    "type": "boolean"
+                                  },
+                                  "links": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "service": {
+                                          "type": "string",
+                                          "enum": [
+                                            "apple_music",
+                                            "spotify",
+                                            "youtube"
+                                          ]
+                                        },
+                                        "change": {
+                                          "type": "string",
+                                          "enum": [
+                                            "added",
+                                            "removed",
+                                            "changed"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "service",
+                                        "change"
+                                      ]
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "added_credits",
+                                  "removed_credits",
+                                  "changed_genres",
+                                  "changed_labels",
+                                  "changed_lyrics",
+                                  "changed_notes",
+                                  "changed_title",
+                                  "changed_release_date",
+                                  "changed_artwork",
+                                  "links"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           },
                           "song": {
                             "anyOf": [
@@ -4413,6 +4576,7 @@
                           "id",
                           "action",
                           "action_at",
+                          "details",
                           "song"
                         ]
                       }
@@ -5489,6 +5653,18 @@
             "description": "Restrict to claimed (linked account) or catalogue-only artists."
           },
           {
+            "name": "lifecycle",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "legacy"
+              ]
+            },
+            "description": "Restrict to active artists or legacy ones (deceased solo artists / disbanded groups)."
+          },
+          {
             "name": "role",
             "in": "query",
             "schema": {
@@ -5602,6 +5778,19 @@
                               }
                             ]
                           },
+                          "role_songs": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Songs credited in the requested role filter. Null when no role filter is active."
+                          },
                           "has_credits": {
                             "type": "boolean"
                           },
@@ -5697,6 +5886,51 @@
                                 "type": "null"
                               }
                             ]
+                          },
+                          "is_deceased": {
+                            "type": "boolean"
+                          },
+                          "namesake_disambiguator": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "namesake_role": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "namesake_song": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "namesake_song_year": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           }
                         },
                         "required": [
@@ -5705,6 +5939,7 @@
                           "prefix_title",
                           "is_group",
                           "total_songs",
+                          "role_songs",
                           "has_credits",
                           "role_assignments",
                           "total_unpublished",
@@ -5713,7 +5948,12 @@
                           "username",
                           "avatar_data",
                           "user_image",
-                          "aliases"
+                          "aliases",
+                          "is_deceased",
+                          "namesake_disambiguator",
+                          "namesake_role",
+                          "namesake_song",
+                          "namesake_song_year"
                         ]
                       }
                     },
