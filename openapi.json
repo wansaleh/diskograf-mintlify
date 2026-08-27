@@ -38,6 +38,10 @@
       "description": "Cross-category keyword search."
     },
     {
+      "name": "Discovery",
+      "description": "Composite catalogue selections for exploring Malaysian music."
+    },
+    {
       "name": "Meta",
       "description": "Service index, statistics and health."
     },
@@ -3058,6 +3062,659 @@
         }
       }
     },
+    "/v1/discover": {
+      "get": {
+        "operationId": "getV1Discover",
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "Discover catalogue selections",
+        "description": "Composite catalogue selections for exploring Malaysian music. Random sections accept independent PostgreSQL random seeds; omitted seeds use the current daily values.",
+        "parameters": [
+          {
+            "name": "song_seed",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": -0.999999,
+              "maximum": 0.999999,
+              "description": "Finite PostgreSQL random seed for the surprise song selection."
+            }
+          },
+          {
+            "name": "artist_seed",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": -0.999999,
+              "maximum": 0.999999,
+              "description": "Finite PostgreSQL random seed for the random artist selection."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Composite catalogue selections.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "genres": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "slug": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "color": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "image_url": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "description": "Absolute CDN URL for the genre artwork."
+                              },
+                              "song_count": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "slug",
+                              "title",
+                              "color",
+                              "image_url",
+                              "song_count"
+                            ]
+                          }
+                        },
+                        "surprise_song": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                "title": {
+                                  "type": "string"
+                                },
+                                "slug": {
+                                  "type": "string",
+                                  "description": "URL-safe form of the title. Not unique — pair it with the id."
+                                },
+                                "released_at": {
+                                  "type": "string"
+                                },
+                                "artwork_url": {
+                                  "type": "string",
+                                  "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
+                                },
+                                "artwork_source": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "enum": [
+                                        "Custom",
+                                        "Apple Music",
+                                        "Spotify",
+                                        "YouTube"
+                                      ]
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "youtube_video_id": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "youtube_video_url": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "youtube_views": {
+                                  "anyOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "youtube_views_per_day": {
+                                  "anyOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "artists": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "type": "integer",
+                                        "minimum": -9007199254740991,
+                                        "maximum": 9007199254740991
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name"
+                                    ]
+                                  },
+                                  "description": "Primary performing credits only, in credit order."
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "title",
+                                "slug",
+                                "released_at",
+                                "artwork_url",
+                                "artwork_source",
+                                "youtube_video_id",
+                                "youtube_video_url",
+                                "youtube_views",
+                                "youtube_views_per_day",
+                                "artists"
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "random_artists": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "slug": {
+                                "type": "string"
+                              },
+                              "prefix_title": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "is_group": {
+                                "anyOf": [
+                                  {
+                                    "type": "boolean"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "total_songs": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "role_songs": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "description": "Songs credited in the requested role filter. Null when no role filter is active."
+                              },
+                              "total_credits": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "disambiguator": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "description": "Editor-supplied namesake override. Null for almost every artist — treat it as an optional extra label, not a reliable way to tell namesakes apart."
+                              },
+                              "first_release_year": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "last_release_year": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "avatar_url": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "username": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "description": "The claimed account handle, if any. Internal numeric user ids are never exposed."
+                              },
+                              "country": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "is_deceased": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "slug",
+                              "prefix_title",
+                              "is_group",
+                              "total_songs",
+                              "role_songs",
+                              "total_credits",
+                              "disambiguator",
+                              "first_release_year",
+                              "last_release_year",
+                              "avatar_url",
+                              "username",
+                              "country",
+                              "is_deceased"
+                            ]
+                          }
+                        },
+                        "hidden_gems": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "slug": {
+                                "type": "string",
+                                "description": "URL-safe form of the title. Not unique — pair it with the id."
+                              },
+                              "released_at": {
+                                "type": "string"
+                              },
+                              "artwork_url": {
+                                "type": "string",
+                                "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
+                              },
+                              "artwork_source": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": [
+                                      "Custom",
+                                      "Apple Music",
+                                      "Spotify",
+                                      "YouTube"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_video_id": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_video_url": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_views": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_views_per_day": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "artists": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name"
+                                  ]
+                                },
+                                "description": "Primary performing credits only, in credit order."
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "title",
+                              "slug",
+                              "released_at",
+                              "artwork_url",
+                              "artwork_source",
+                              "youtube_video_id",
+                              "youtube_video_url",
+                              "youtube_views",
+                              "youtube_views_per_day",
+                              "artists"
+                            ]
+                          }
+                        },
+                        "most_viewed": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "slug": {
+                                "type": "string",
+                                "description": "URL-safe form of the title. Not unique — pair it with the id."
+                              },
+                              "released_at": {
+                                "type": "string"
+                              },
+                              "artwork_url": {
+                                "type": "string",
+                                "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
+                              },
+                              "artwork_source": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": [
+                                      "Custom",
+                                      "Apple Music",
+                                      "Spotify",
+                                      "YouTube"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_video_id": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_video_url": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_views": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_views_per_day": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "artists": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name"
+                                  ]
+                                },
+                                "description": "Primary performing credits only, in credit order."
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "title",
+                              "slug",
+                              "released_at",
+                              "artwork_url",
+                              "artwork_source",
+                              "youtube_video_id",
+                              "youtube_video_url",
+                              "youtube_views",
+                              "youtube_views_per_day",
+                              "artists"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "genres",
+                        "surprise_song",
+                        "random_artists",
+                        "hidden_gems",
+                        "most_viewed"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
     "/v1/genres": {
       "get": {
         "operationId": "getV1Genres",
@@ -5314,6 +5971,12 @@
                               }
                             ]
                           },
+                          "has_lyrics": {
+                            "type": "boolean"
+                          },
+                          "has_notes": {
+                            "type": "boolean"
+                          },
                           "total_edits": {
                             "type": "integer",
                             "minimum": -9007199254740991,
@@ -5443,6 +6106,8 @@
                           "created_at",
                           "published_at",
                           "data",
+                          "has_lyrics",
+                          "has_notes",
                           "total_edits",
                           "last_edited_at",
                           "gen_youtube_views",
