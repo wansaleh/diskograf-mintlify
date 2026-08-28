@@ -3090,6 +3090,16 @@
               "maximum": 0.999999,
               "description": "Finite PostgreSQL random seed for the random artist selection."
             }
+          },
+          {
+            "name": "hidden_gems_seed",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": -0.999999,
+              "maximum": 0.999999,
+              "description": "Optional seed that reshuffles the hidden-gems pick within each decade's low-exposure candidate pool. Omitted: the strict lowest-view-count pick per decade."
+            }
           }
         ],
         "responses": {
@@ -3450,6 +3460,36 @@
                             ]
                           }
                         },
+                        "labels": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "slug": {
+                                "type": "string"
+                              },
+                              "song_count": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "slug",
+                              "song_count"
+                            ]
+                          }
+                        },
                         "hidden_gems": {
                           "type": "array",
                           "items": {
@@ -3697,6 +3737,7 @@
                         "genres",
                         "surprise_song",
                         "random_artists",
+                        "labels",
                         "hidden_gems",
                         "most_viewed"
                       ]
