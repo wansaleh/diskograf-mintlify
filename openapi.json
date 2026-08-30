@@ -380,7 +380,7 @@
           "Search"
         ],
         "summary": "Search the catalogue",
-        "description": "Cross-category keyword search over songs, artists and labels — the same search that backs the site header, including artist:/label:/year:/decade: filters and \"quoted phrase\" literal matching. Callable only from diskograf.com (Origin/Referer checked) — this is the one route meant for direct browser calls from the site itself, not third-party use.",
+        "description": "Cross-category keyword search over songs, artists and labels — the same search that backs the site header, including artist:/label:/year:/decade: filters, yt:\"...\" YouTube metadata search, and \"quoted phrase\" literal matching. Callable only from diskograf.com (Origin/Referer checked) — this is the one route meant for direct browser calls from the site itself, not third-party use.",
         "parameters": [
           {
             "name": "q",
@@ -389,7 +389,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The keyword. Required, and capped in length. Supports artist:/label:/year:/decade: filters and \"quoted phrase\" literals, same as the site search."
+            "description": "The keyword. Required, and capped in length. Supports artist:/label:/year:/decade: filters, yt:\"...\" for a literal search of cached YouTube title/channel/description, and \"quoted phrase\" literals."
           },
           {
             "name": "scope",
@@ -825,7 +825,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Keyword search across title and credited artists."
+            "description": "Keyword search across title and credited artists. Supports yt:\"...\" for a case-insensitive literal substring match in the cached YouTube title, channel name, and description."
           },
           {
             "name": "genre",
@@ -2836,7 +2836,8 @@
             "in": "query",
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Keyword search across title and credited artists. Supports yt:\"...\" for a case-insensitive literal substring match in the cached YouTube title, channel name, and description."
           },
           {
             "name": "genre",
@@ -3976,7 +3977,8 @@
             "in": "query",
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Keyword search across title and credited artists. Supports yt:\"...\" for a case-insensitive literal substring match in the cached YouTube title, channel name, and description."
           },
           {
             "name": "role",
@@ -4408,7 +4410,8 @@
             "in": "query",
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Keyword search across title and credited artists. Supports yt:\"...\" for a case-insensitive literal substring match in the cached YouTube title, channel name, and description."
           },
           {
             "name": "genre",
@@ -5535,7 +5538,8 @@
             "in": "query",
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Keyword search across title and credited artists. Supports yt:\"...\" for a case-insensitive literal substring match in the cached YouTube title, channel name, and description."
           },
           {
             "name": "genre",
@@ -5781,7 +5785,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Fuzzy keyword search across title, credited artists and the cached YouTube description."
+            "description": "Fuzzy keyword search across title, credited artists and the cached YouTube description. Backstage also supports yt: for the original YouTube title, channel name and description; quoted yt values match literally."
           },
           {
             "name": "status",
