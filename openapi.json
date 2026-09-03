@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Diskograf API",
-    "description": "A public, read-only REST API over the Diskograf catalogue of Malaysian music.\n\nPublic endpoints require no authentication and expose only published\ncatalogue rows. Requests are rate limited to 240 per 60 seconds per IP address.\n\nThe `/v1/admin` endpoints are the exception: authenticated with a short-lived\nbearer token minted by diskograf.com for Backstage staff, rate limited per\nprincipal, and — because they expose unpublished rows — never cached.\n\nEvery successful response is wrapped in an envelope. List endpoints return\n`{ \"data\": [...], \"meta\": { \"total\", \"limit\", \"offset\" } }`; detail endpoints\nreturn `{ \"data\": {...} }`. Errors return `{ \"error\": { \"code\", \"message\" } }`.",
+    "description": "A public, read-only REST API over the Diskograf catalogue of Malaysian music.\n\nPublic endpoints require no authentication and expose only published\ncatalogue rows. Requests are rate limited to 240 per 60 seconds per IP address.\n\nThe `/v1/admin` endpoints are the exception: authenticated with a short-lived\nbearer token minted by diskograf.com for Backstage staff, rate limited per\nprincipal, and — because they expose unpublished rows — never cached.\n\nEvery successful response is wrapped in an envelope. List endpoints return\n`{ \"data\": [...], \"meta\": { \"total\", \"limit\", \"offset\", \"next_cursor\" } }`; detail endpoints\nreturn `{ \"data\": {...} }`. Errors return `{ \"error\": { \"code\", \"message\" } }`.",
     "version": "1.0.0"
   },
   "servers": [
@@ -16,6 +16,14 @@
     {
       "name": "Songs",
       "description": "The catalogue of published songs and their credits."
+    },
+    {
+      "name": "Albums",
+      "description": "Published albums and their track listings."
+    },
+    {
+      "name": "Curated Lists",
+      "description": "Published editorial song lists."
     },
     {
       "name": "Artists",
@@ -319,13 +327,27 @@
                                 "type": "null"
                               }
                             ]
+                          },
+                          "tag": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "icon_class": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
                           }
                         },
                         "required": [
                           "id",
                           "slug",
                           "title",
-                          "order"
+                          "order",
+                          "tag",
+                          "icon_class"
                         ]
                       }
                     },
@@ -336,7 +358,7 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Total rows matching the query, ignoring limit and offset."
+                          "description": "Total rows matching the query, ignoring page size and position."
                         },
                         "limit": {
                           "type": "integer",
@@ -348,7 +370,14 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Zero-based row offset of this page."
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
@@ -850,6 +879,14 @@
             "description": "Inclusive release-date upper bound (yyyy-MM-dd)."
           },
           {
+            "name": "has_artwork",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Restrict to songs with square Spotify/Apple artwork."
+          },
+          {
             "name": "sort",
             "in": "query",
             "schema": {
@@ -1019,7 +1056,7 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Total rows matching the query, ignoring limit and offset."
+                          "description": "Total rows matching the query, ignoring page size and position."
                         },
                         "limit": {
                           "type": "integer",
@@ -1031,7 +1068,14 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Zero-based row offset of this page."
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
@@ -1293,6 +1337,109 @@
                   },
                   "required": [
                     "data"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/songs/{songId}/albums": {
+      "get": {
+        "operationId": "getV1SongsBySongIdAlbums",
+        "tags": [
+          "Albums"
+        ],
+        "summary": "List a song's albums",
+        "description": "Published albums containing this published, non-deleted song, ordered by album title.",
+        "parameters": [
+          {
+            "name": "songId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The song's public albums.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "position": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "position"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Total rows matching the query, ignoring page size and position."
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Page size actually applied. Bounded by apiConfig.maxLimit (80)."
+                        },
+                        "offset": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "limit",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
                   ]
                 }
               }
@@ -1873,6 +2020,363 @@
         }
       }
     },
+    "/v1/albums": {
+      "get": {
+        "operationId": "getV1Albums",
+        "tags": [
+          "Albums"
+        ],
+        "summary": "List albums",
+        "description": "Published albums with at least one published, non-deleted song. The list is returned whole rather than paginated.",
+        "responses": {
+          "200": {
+            "description": "All public albums.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "artwork_url": {
+                            "description": "Absolute CDN URL for the album artwork.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "song_count": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "latest_released_at": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "artwork_url",
+                          "song_count",
+                          "latest_released_at"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Total rows matching the query, ignoring page size and position."
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Page size actually applied. Bounded by apiConfig.maxLimit (80)."
+                        },
+                        "offset": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "limit",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/albums/{albumId}": {
+      "get": {
+        "operationId": "getV1AlbumsByAlbumId",
+        "tags": [
+          "Albums"
+        ],
+        "summary": "Get an album",
+        "description": "Published album detail with resolved artists and published, non-deleted songs in track order.",
+        "parameters": [
+          {
+            "name": "albumId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The album.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "artwork_url": {
+                          "description": "Absolute CDN URL for the album artwork.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "artists": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "prefix_title": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "is_group": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "prefix_title",
+                              "is_group"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "songs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "slug": {
+                                "type": "string",
+                                "description": "URL-safe form of the title. Not unique — pair it with the id."
+                              },
+                              "released_at": {
+                                "type": "string"
+                              },
+                              "artwork_url": {
+                                "type": "string",
+                                "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
+                              },
+                              "artwork_source": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": [
+                                      "Custom",
+                                      "Apple Music",
+                                      "Spotify",
+                                      "YouTube"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_video_id": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "youtube_video_url": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "youtube_views": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_views_per_day": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "artists": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name"
+                                  ]
+                                },
+                                "description": "Primary performing credits only, in credit order."
+                              },
+                              "position": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "date_type": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": [
+                                      "FULL",
+                                      "MONTH",
+                                      "YEAR"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "duration_ms": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "title",
+                              "slug",
+                              "released_at",
+                              "artwork_url",
+                              "artwork_source",
+                              "youtube_video_id",
+                              "youtube_video_url",
+                              "youtube_views",
+                              "youtube_views_per_day",
+                              "artists",
+                              "position",
+                              "date_type",
+                              "duration_ms"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "artwork_url",
+                        "artists",
+                        "songs"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
     "/v1/artists": {
       "get": {
         "operationId": "getV1Artists",
@@ -2115,7 +2619,7 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Total rows matching the query, ignoring limit and offset."
+                          "description": "Total rows matching the query, ignoring page size and position."
                         },
                         "limit": {
                           "type": "integer",
@@ -2127,7 +2631,14 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Zero-based row offset of this page."
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
@@ -2235,7 +2746,7 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Total rows matching the query, ignoring limit and offset."
+                          "description": "Total rows matching the query, ignoring page size and position."
                         },
                         "limit": {
                           "type": "integer",
@@ -2247,7 +2758,235 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Zero-based row offset of this page."
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "limit",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/v1/artists/prolific-lead-performers": {
+      "get": {
+        "operationId": "getV1ArtistsProlificLeadPerformers",
+        "tags": [
+          "Artists"
+        ],
+        "summary": "List prolific lead performers",
+        "description": "The top 200 artists by published lead-performer song count. Backs Backstage's YouTube discovery tool. Reads only published, non-deleted songs, so the response is public-safe.",
+        "responses": {
+          "200": {
+            "description": "Up to 200 lead performers, ranked by published song count.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "disambiguator": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "avatar_url": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "lead_song_count": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "disambiguator",
+                          "avatar_url",
+                          "lead_song_count"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Total rows matching the query, ignoring page size and position."
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Page size actually applied. Bounded by apiConfig.maxLimit (80)."
+                        },
+                        "offset": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "limit",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/artists/most-releases": {
+      "get": {
+        "operationId": "getV1ArtistsMostReleases",
+        "tags": [
+          "Artists"
+        ],
+        "summary": "List artists with the most releases this year",
+        "description": "Artists ranked by published primary-credit songs released since the start of the current calendar year. Backs the homepage's \"Most Releases\" rail. Reads only published, non-deleted songs, so the response is public-safe.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 80,
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Artists ranked by release count this year.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "is_group": {
+                            "type": [
+                              "boolean",
+                              "null"
+                            ]
+                          },
+                          "avatar_url": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "release_count": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "is_group",
+                          "avatar_url",
+                          "release_count"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Total rows matching the query, ignoring page size and position."
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Page size actually applied. Bounded by apiConfig.maxLimit (80)."
+                        },
+                        "offset": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
@@ -2795,7 +3534,7 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Total rows matching the query, ignoring limit and offset."
+                          "description": "Total rows matching the query, ignoring page size and position."
                         },
                         "limit": {
                           "type": "integer",
@@ -2807,7 +3546,14 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Zero-based row offset of this page."
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
@@ -2820,6 +3566,419 @@
                   "required": [
                     "data",
                     "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/artworks": {
+      "get": {
+        "operationId": "getV1Artworks",
+        "tags": [
+          "Search"
+        ],
+        "summary": "Search or look up artwork",
+        "description": "Proxies Apple Music/iTunes and Spotify for the artwork finder tool and the song editor's artwork/streaming-link fields. Pass `uri`+`from` for a single-track lookup, or `title` for a keyword search. Callable only from diskograf.com (Origin/Referer checked).",
+        "parameters": [
+          {
+            "name": "title",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Keyword search across Apple Music and Spotify. Ignored when `uri` is set."
+          },
+          {
+            "name": "uri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "A Spotify or Apple Music track URI/link to look up directly. Requires `from`."
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "apple",
+                "spotify"
+              ]
+            },
+            "description": "Limits a title search to one provider, or selects the provider for a `uri` lookup."
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Two-letter storefront/market code. Defaults to `my`."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 40,
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results, or a single lookup result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "uri": {
+                            "type": "string"
+                          },
+                          "artist": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "release_date": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "artwork": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "artwork_medium": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "artwork_thumb": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "duration": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "from": {
+                            "type": "string",
+                            "enum": [
+                              "apple",
+                              "spotify"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "uri",
+                          "artist",
+                          "title",
+                          "release_date",
+                          "artwork",
+                          "artwork_medium",
+                          "artwork_thumb",
+                          "duration",
+                          "from"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Total rows matching the query, ignoring page size and position."
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Page size actually applied. Bounded by apiConfig.maxLimit (80)."
+                        },
+                        "offset": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "limit",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin/Referer is not diskograf.com."
+          }
+        }
+      }
+    },
+    "/v1/artworks/download": {
+      "get": {
+        "operationId": "getV1ArtworksDownload",
+        "tags": [
+          "Search"
+        ],
+        "summary": "Download an artwork image",
+        "description": "Streams an allowlisted artwork CDN image back as an attachment. `url` must be an https URL on a host these search/lookup results can point at. Callable only from diskograf.com (Origin/Referer checked).",
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filename",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Base filename, without extension. Sanitized and capped at 80 characters."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The image bytes, as an attachment."
+          },
+          "400": {
+            "description": "The source URL is missing, not allowlisted, or not a supported image format."
+          },
+          "403": {
+            "description": "Origin/Referer is not diskograf.com."
+          },
+          "413": {
+            "description": "The image exceeds the 10 MB size cap."
+          },
+          "502": {
+            "description": "The source image could not be downloaded."
+          }
+        }
+      }
+    },
+    "/v1/curated-lists/{listId}": {
+      "get": {
+        "operationId": "getV1CuratedListsByListId",
+        "tags": [
+          "Curated Lists"
+        ],
+        "summary": "Get a curated list",
+        "description": "Published curated list with published, non-deleted songs in curated order.",
+        "parameters": [
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The curated list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "songs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "slug": {
+                                "type": "string",
+                                "description": "URL-safe form of the title. Not unique — pair it with the id."
+                              },
+                              "released_at": {
+                                "type": "string"
+                              },
+                              "artwork_url": {
+                                "type": "string",
+                                "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
+                              },
+                              "artwork_source": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": [
+                                      "Custom",
+                                      "Apple Music",
+                                      "Spotify",
+                                      "YouTube"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_video_id": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "youtube_video_url": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "youtube_views": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_views_per_day": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "artists": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name"
+                                  ]
+                                },
+                                "description": "Primary performing credits only, in credit order."
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "title",
+                              "slug",
+                              "released_at",
+                              "artwork_url",
+                              "artwork_source",
+                              "youtube_video_id",
+                              "youtube_video_url",
+                              "youtube_views",
+                              "youtube_views_per_day",
+                              "artists"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "description",
+                        "songs"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
                   ]
                 }
               }
@@ -3536,7 +4695,7 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Total rows matching the query, ignoring limit and offset."
+                          "description": "Total rows matching the query, ignoring page size and position."
                         },
                         "limit": {
                           "type": "integer",
@@ -3548,7 +4707,14 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Zero-based row offset of this page."
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
@@ -3841,7 +5007,7 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Total rows matching the query, ignoring limit and offset."
+                          "description": "Total rows matching the query, ignoring page size and position."
                         },
                         "limit": {
                           "type": "integer",
@@ -3853,7 +5019,14 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Zero-based row offset of this page."
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
@@ -3976,7 +5149,7 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Total rows matching the query, ignoring limit and offset."
+                          "description": "Total rows matching the query, ignoring page size and position."
                         },
                         "limit": {
                           "type": "integer",
@@ -3988,7 +5161,14 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Zero-based row offset of this page."
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
@@ -4019,7 +5199,7 @@
           "Labels"
         ],
         "summary": "Get a label",
-        "description": "Only the id and name. The label record also carries freeform import metadata, which is not public.",
+        "description": "Everything the public label page renders. The label record also carries freeform import metadata, which is not public.",
         "parameters": [
           {
             "name": "labelId",
@@ -4048,11 +5228,35 @@
                         },
                         "name": {
                           "type": "string"
+                        },
+                        "company_name": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "logo_url": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "song_count": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
                         }
                       },
                       "required": [
                         "id",
-                        "name"
+                        "name",
+                        "company_name",
+                        "logo_url",
+                        "status",
+                        "song_count"
                       ]
                     }
                   },
@@ -4273,7 +5477,7 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Total rows matching the query, ignoring limit and offset."
+                          "description": "Total rows matching the query, ignoring page size and position."
                         },
                         "limit": {
                           "type": "integer",
@@ -4285,7 +5489,14 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Zero-based row offset of this page."
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
@@ -4424,7 +5635,7 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Total rows matching the query, ignoring limit and offset."
+                          "description": "Total rows matching the query, ignoring page size and position."
                         },
                         "limit": {
                           "type": "integer",
@@ -4436,7 +5647,14 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Zero-based row offset of this page."
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
@@ -4925,7 +6143,7 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Total rows matching the query, ignoring limit and offset."
+                          "description": "Total rows matching the query, ignoring page size and position."
                         },
                         "limit": {
                           "type": "integer",
@@ -4937,7 +6155,14 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Zero-based row offset of this page."
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
@@ -5337,7 +6562,7 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Total rows matching the query, ignoring limit and offset."
+                          "description": "Total rows matching the query, ignoring page size and position."
                         },
                         "limit": {
                           "type": "integer",
@@ -5349,7 +6574,14 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Zero-based row offset of this page."
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
@@ -5369,6 +6601,137 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/youtube/search": {
+      "get": {
+        "operationId": "getV1YoutubeSearch",
+        "tags": [
+          "Search"
+        ],
+        "summary": "Search YouTube videos",
+        "description": "Proxies the YouTube Data API for the song editor's video picker. Callable only from diskograf.com (Origin/Referer checked).",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The keyword to search YouTube for."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching YouTube videos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "video_id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "owner": {
+                            "type": "string"
+                          },
+                          "thumbnail": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "duration": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "views": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "published_at": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "video_id",
+                          "title",
+                          "owner",
+                          "thumbnail",
+                          "duration",
+                          "views",
+                          "published_at"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Total rows matching the query, ignoring page size and position."
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Page size actually applied. Bounded by apiConfig.maxLimit (80)."
+                        },
+                        "offset": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "limit",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "description": "Origin/Referer is not diskograf.com."
+          },
+          "503": {
+            "description": "YouTube integration is not configured."
           }
         }
       }
@@ -5434,8 +6797,6 @@
                 "published",
                 "gen_youtube_views",
                 "gen_youtube_views_rate",
-                "total_edits",
-                "last_edited",
                 "relevance"
               ],
               "default": "newest"
@@ -5474,6 +6835,14 @@
             "description": "Inclusive release-date upper bound (yyyy-MM-dd)."
           },
           {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque cursor from a previous response. When supplied, `offset` is ignored."
+          },
+          {
             "name": "limit",
             "in": "query",
             "schema": {
@@ -5492,7 +6861,7 @@
               "minimum": 0,
               "default": 0
             },
-            "description": "Zero-based row offset."
+            "description": "Legacy zero-based row offset. Ignored when `cursor` is supplied."
           }
         ],
         "responses": {
@@ -5733,7 +7102,7 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Total rows matching the query, ignoring limit and offset."
+                          "description": "Total rows matching the query, ignoring page size and position."
                         },
                         "limit": {
                           "type": "integer",
@@ -5745,7 +7114,14 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Zero-based row offset of this page."
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
@@ -5943,6 +7319,14 @@
             "description": "Restrict to artists with this role slug. Repeat the parameter for several."
           },
           {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque cursor from a previous response. When supplied, `offset` is ignored."
+          },
+          {
             "name": "order_column",
             "in": "query",
             "schema": {
@@ -5992,7 +7376,7 @@
               "minimum": 0,
               "default": 0
             },
-            "description": "Zero-based row offset."
+            "description": "Legacy zero-based row offset. Ignored when `cursor` is supplied."
           }
         ],
         "responses": {
@@ -6015,6 +7399,12 @@
                           },
                           "name": {
                             "type": "string"
+                          },
+                          "country": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
                           },
                           "prefix_title": {
                             "type": [
@@ -6166,6 +7556,7 @@
                         "required": [
                           "id",
                           "name",
+                          "country",
                           "prefix_title",
                           "is_group",
                           "total_songs",
@@ -6194,7 +7585,7 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Total rows matching the query, ignoring limit and offset."
+                          "description": "Total rows matching the query, ignoring page size and position."
                         },
                         "limit": {
                           "type": "integer",
@@ -6206,7 +7597,14 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Zero-based row offset of this page."
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
@@ -6259,6 +7657,14 @@
             "description": "Fuzzy search across the label name."
           },
           {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque cursor from a previous response. When supplied, `offset` is ignored."
+          },
+          {
             "name": "order_column",
             "in": "query",
             "schema": {
@@ -6305,7 +7711,7 @@
               "minimum": 0,
               "default": 0
             },
-            "description": "Zero-based row offset."
+            "description": "Legacy zero-based row offset. Ignored when `cursor` is supplied."
           }
         ],
         "responses": {
@@ -6379,7 +7785,7 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Total rows matching the query, ignoring limit and offset."
+                          "description": "Total rows matching the query, ignoring page size and position."
                         },
                         "limit": {
                           "type": "integer",
@@ -6391,7 +7797,14 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Zero-based row offset of this page."
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
@@ -6524,7 +7937,7 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Total rows matching the query, ignoring limit and offset."
+                          "description": "Total rows matching the query, ignoring page size and position."
                         },
                         "limit": {
                           "type": "integer",
@@ -6536,7 +7949,14 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Zero-based row offset of this page."
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
@@ -6669,7 +8089,7 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Total rows matching the query, ignoring limit and offset."
+                          "description": "Total rows matching the query, ignoring page size and position."
                         },
                         "limit": {
                           "type": "integer",
@@ -6681,7 +8101,14 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Zero-based row offset of this page."
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
@@ -6758,6 +8185,14 @@
             "description": "Restrict to accounts with (yes) or without (no) a username."
           },
           {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque cursor from a previous response. When supplied, `offset` is ignored."
+          },
+          {
             "name": "order_column",
             "in": "query",
             "schema": {
@@ -6803,7 +8238,7 @@
               "minimum": 0,
               "default": 0
             },
-            "description": "Zero-based row offset."
+            "description": "Legacy zero-based row offset. Ignored when `cursor` is supplied."
           }
         ],
         "responses": {
@@ -6973,7 +8408,7 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Total rows matching the query, ignoring limit and offset."
+                          "description": "Total rows matching the query, ignoring page size and position."
                         },
                         "limit": {
                           "type": "integer",
@@ -6985,7 +8420,14 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991,
-                          "description": "Zero-based row offset of this page."
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
