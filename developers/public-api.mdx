@@ -40,6 +40,7 @@ The API applies the same public visibility rules as the web app:
 
 - Song endpoints return published, non-deleted songs only.
 - User endpoints return public, claimed, non-banned member profiles.
+- Loved-song endpoints return only published, non-deleted songs.
 - A public user profile may link to a claimed artist profile. Private account fields are never returned.
 - Labels are included when they are associated with at least one published song.
 
@@ -173,6 +174,17 @@ An unknown genre slug returns `404` rather than an empty collection.
 
 An unknown label returns `404`. The label detail endpoint intentionally returns only public label metadata; internal import metadata is not part of the API.
 
+### Albums and curated lists
+
+| Method and route | Description | Parameters |
+| --- | --- | --- |
+| `GET /v1/albums` | Lists published albums with at least one visible song. | No query parameters. |
+| `GET /v1/albums/{albumId}` | Returns album metadata, artists, and ordered tracks. | `albumId` is a positive integer. |
+| `GET /v1/songs/{songId}/albums` | Lists published album memberships for one public song. | `songId` is a positive integer. |
+| `GET /v1/curated-lists/{listId}` | Returns one published editorial song list. | `listId` is a positive integer. |
+
+An unknown album, song, or curated list returns `404`. Album and curated-list responses exclude unpublished and deleted songs.
+
 ### Public users and contributors
 
 | Method and route | Description | Parameters |
@@ -181,6 +193,7 @@ An unknown label returns `404`. The label detail endpoint intentionally returns 
 | `GET /v1/users/overview` | Returns contributor totals and top contributors. | No query parameters. |
 | `GET /v1/users/{username}` | Returns a public member profile and its optional artist link. | `username` is the public handle, not a numeric user ID. |
 | `GET /v1/users/{username}/contributions` | Lists a member's contribution history, newest first. | `limit`, `offset` |
+| `GET /v1/users/{username}/loves` | Lists the member's published, non-deleted loved songs. | `limit`, `offset` |
 | `GET /v1/users/{username}/songs` | Lists published songs credited to the member's claimed artist profile. | `q`, `genre`, `role`, `sort`, `order`, `limit`, `offset` |
 
 For `/v1/users`:
@@ -237,8 +250,24 @@ Song detail adds `published_at`, `views`, `claps`, and the complete credit and c
     "claps": 0,
     "artwork_url": "https://cdn.diskograf.com/...",
     "artwork_source": null,
-    "youtube_video_id": null,
-    "youtube_video_url": null,
+    "notes": null,
+    "lyrics": null,
+    "love_count": 0,
+    "media": {
+      "youtube_id": null,
+      "spotify_id": null,
+      "apple_music_id": null,
+      "spotify_url": null,
+      "apple_music_url": null,
+      "date_type": null,
+      "duration_ms": null
+    },
+    "youtube": {
+      "duration_seconds": null,
+      "views": null,
+      "views_per_day": null,
+      "last_fetched": null
+    },
     "credits": [],
     "genres": [],
     "labels": []
@@ -246,7 +275,9 @@ Song detail adds `published_at`, `views`, `claps`, and the complete credit and c
 }
 ```
 
-Each credit contains `order`, an `artist` object, and a `role` object. A role can be `null` for an unclassified credit. Each genre contains `id`, `slug`, and `title`; each label contains `id` and `name`.
+Each credit contains `order`, an `artist` object, and a `role` object. A role can be `null` for an unclassified credit. Each artist includes a resolved `avatar_url`. Each role includes `id`, `title`, `slug`, `tag`, and `order`. Each genre contains `id`, `slug`, and `title`; each label contains `id` and `name`.
+
+Song detail also includes `notes`, `lyrics`, and `love_count`. The `media` object contains named YouTube, Spotify, Apple Music, date-type, and duration fields. The `youtube` object contains duration, views, views-per-day, and last-fetched fields. Raw song and YouTube JSON are not returned.
 
 #### Song contributors
 
@@ -276,11 +307,12 @@ disambiguator, first_release_year, last_release_year, avatar_url, username
 
 Nullable values are returned as `null`. Artist detail adds:
 
-- `aliases`, `biodata`, `country`, and `place`.
-- `links` with `website`, `instagram`, `twitter`, `tiktok`, `youtube`, and `facebook` keys.
+- `aliases`, `biodata`, `country`, `place`, birth and death fields, job, and status.
+- `alias_artists`, each with `id`, `name`, and `prefix_title`.
+- `links` with `website`, `instagram`, `twitter`, `tiktok`, `youtube`, `facebook`, `spotify`, and `applemusic` keys.
 - `roles`, each with `id`, `slug`, `title`, and a credit `count`.
 - `genres`, each with `id`, `slug`, `title`, and a song `count`.
-- `associated_acts`, each with `id`, `name`, and `slug`.
+- `associated_acts`, each with `id`, `name`, `slug`, `username`, and `avatar_url`.
 
 ### Genre and label data
 
@@ -288,15 +320,29 @@ Genre list items contain `id`, `slug`, `title`, `color`, and `song_count`. A gen
 
 Label list items contain `id`, `name`, `slug`, and `song_count`. Label detail contains `id` and `name`.
 
+### Album and curated-list data
+
+An album summary contains `id`, `title`, `artwork_url`, `song_count`, and `latest_released_at`.
+
+Album detail contains `id`, `title`, `artwork_url`, `released_at`, an `artists` array, and a `songs` array. Its `released_at` uses the manual album date when set, otherwise the latest release date among visible tracks. Each album artist contains `id`, `name`, `prefix_title`, and `is_group`.
+
+Each album track is a song card plus `position`, `date_type`, `duration_ms`, and `youtube_duration_seconds`. `duration_ms` is the manually-entered track length; `youtube_duration_seconds` is the auto-fetched YouTube length, used as a fallback when `duration_ms` is `null`.
+
+A song's album membership (`/v1/songs/{songId}/albums`) contains `id`, `title`, `artwork_url`, and the track `position`.
+
+A curated list contains `id`, `title`, `description`, and a `songs` array of song cards.
+
 ### User data
 
 A public user profile contains:
 
 ```text
-username, name, avatar_url, created_at, is_fan, artist
+username, name, avatar_url, created_at, is_fan, profile, artist
 ```
 
-`artist` is either `null` or an object containing the claimed artist's `id`, `name`, `slug`, `is_group`, `total_songs`, `total_credits`, `first_release_year`, `last_release_year`, and `avatar_url`.
+`profile` contains named biography, location, date, job, status, alias, and social-link fields.
+
+`artist` is either `null` or an object containing the claimed artist's `id`, `name`, `slug`, `prefix_title`, `aliases`, `is_group`, `total_songs`, `total_credits`, `first_release_year`, `last_release_year`, `avatar_url`, and `associated_acts`.
 
 User directory items also include `joined_at` and `contribution_count`. The overview endpoint returns:
 
@@ -307,6 +353,8 @@ public_members, contributors, recent_contributions, active, all_time
 `active` represents the recent 30-day window. `active` and `all_time` contain the top public contributors and are capped at 10 entries each.
 
 Contribution history items contain `id`, `action`, `action_at`, and `song`. `song` is either a song card or `null` when the related song is no longer publicly available.
+
+`GET /v1/users/{username}/loves` returns published, non-deleted song cards in love order. Its list metadata reports the total visible songs.
 
 ### Search data
 

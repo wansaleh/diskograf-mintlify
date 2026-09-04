@@ -126,12 +126,25 @@
             ]
           },
           {
+            "group": "Albums",
+            "pages": [
+              "GET /v1/albums",
+              "GET /v1/albums/{albumId}",
+              "GET /v1/songs/{songId}/albums"
+            ]
+          },
+          {
+            "group": "Curated Lists",
+            "pages": ["GET /v1/curated-lists/{listId}"]
+          },
+          {
             "group": "Users",
             "pages": [
               "GET /v1/users",
               "GET /v1/users/overview",
               "GET /v1/users/{username}",
               "GET /v1/users/{username}/contributions",
+              "GET /v1/users/{username}/loves",
               "GET /v1/users/{username}/songs"
             ]
           },
