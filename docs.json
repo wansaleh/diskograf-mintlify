@@ -11,9 +11,13 @@
     "dark": "/images/logo/diskograf-icon-dark.svg"
   },
   "colors": {
-    "primary": "#046cfc",
-    "light": "#7ab4fc",
-    "dark": "#040404"
+    "primary": "#9f604c",
+    "light": "#c9826a",
+    "dark": "#6b3c2e"
+  },
+  "background": {
+    "light": "#f8f6f4",
+    "dark": "#120f0b"
   },
   "navbar": {
     "primary": {
