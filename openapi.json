@@ -1547,6 +1547,7 @@
                             "type": "string"
                           },
                           "artwork_url": {
+                            "default": null,
                             "description": "Absolute CDN URL for the album artwork.",
                             "type": [
                               "string",
@@ -2233,6 +2234,42 @@
                               "string",
                               "null"
                             ]
+                          },
+                          "artists": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "prefix_title": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "is_group": {
+                                  "type": [
+                                    "boolean",
+                                    "null"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "name",
+                                "prefix_title",
+                                "is_group"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "description": "Explicit album artists, or primary artists resolved from visible tracks."
                           }
                         },
                         "required": [
@@ -2240,7 +2277,8 @@
                           "title",
                           "artwork_url",
                           "song_count",
-                          "latest_released_at"
+                          "latest_released_at",
+                          "artists"
                         ],
                         "additionalProperties": false
                       }
@@ -2515,6 +2553,44 @@
                                     "type": "null"
                                   }
                                 ]
+                              },
+                              "spotify_url": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "uri"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "description": "Canonical Spotify URL for this track."
+                              },
+                              "spotify_popularity": {
+                                "default": null,
+                                "description": "Spotify popularity score, from 0 to 100.",
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 100
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "apple_music_url": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "uri"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "description": "Apple Music URL for this track."
                               }
                             },
                             "required": [
@@ -2532,7 +2608,10 @@
                               "position",
                               "date_type",
                               "duration_ms",
-                              "youtube_duration_seconds"
+                              "youtube_duration_seconds",
+                              "spotify_url",
+                              "spotify_popularity",
+                              "apple_music_url"
                             ],
                             "additionalProperties": false
                           }
@@ -2593,7 +2672,15 @@
             "schema": {
               "type": "string"
             },
-            "description": "Role slug. Repeat the parameter or comma-separate for several."
+            "description": "Role slug. Repeat or comma-separate to require every selected role."
+          },
+          {
+            "name": "genre",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Genre slug. Repeat or comma-separate to accept any selected genre."
           },
           {
             "name": "status",
@@ -2710,7 +2797,7 @@
                                 "type": "null"
                               }
                             ],
-                            "description": "Songs credited in the requested role filter. Null when no role filter is active."
+                            "description": "Published songs where the artist holds every requested role and any requested genre. Null when no role or genre filter is active."
                           },
                           "total_credits": {
                             "anyOf": [
@@ -3915,6 +4002,17 @@
               "maximum": 40,
               "default": 20
             }
+          },
+          {
+            "name": "raw",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            },
+            "description": "With `uri`+`from`, returns the untouched provider JSON instead of the normalized artwork shape. Used by apps/web to cache the full Spotify/Apple Music track payload on the song row."
           }
         ],
         "responses": {
@@ -4138,6 +4236,13 @@
                             "null"
                           ]
                         },
+                        "artwork_url": {
+                          "description": "Absolute CDN URL for the list artwork.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "songs": {
                           "type": "array",
                           "items": {
@@ -4256,6 +4361,7 @@
                         "id",
                         "title",
                         "description",
+                        "artwork_url",
                         "songs"
                       ],
                       "additionalProperties": false
@@ -4541,7 +4647,7 @@
                                     "type": "null"
                                   }
                                 ],
-                                "description": "Songs credited in the requested role filter. Null when no role filter is active."
+                                "description": "Published songs where the artist holds every requested role and any requested genre. Null when no role or genre filter is active."
                               },
                               "total_credits": {
                                 "anyOf": [
@@ -7742,6 +7848,26 @@
                               ]
                             }
                           },
+                          "albums": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                "title": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "title"
+                              ]
+                            }
+                          },
                           "labels": {
                             "type": "array",
                             "items": {
@@ -7800,6 +7926,7 @@
                           "published_by_username",
                           "last_edited_by_username",
                           "artists",
+                          "albums",
                           "labels",
                           "genres"
                         ]
@@ -8027,6 +8154,14 @@
               "type": "string"
             },
             "description": "Restrict to artists with this role slug. Repeat the parameter for several."
+          },
+          {
+            "name": "genre",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Restrict to artists who have worked on this genre slug. Repeat the parameter for several."
           },
           {
             "name": "cursor",
