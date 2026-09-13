@@ -697,7 +697,7 @@
           "Meta"
         ],
         "summary": "Get catalogue statistics",
-        "description": "Totals across the archive: songs, artists, contributors, credits, genres, labels, and the earliest release year on record.",
+        "description": "Totals across the archive: songs, artists, contributors, credits, genres, labels, the earliest release year on record, and the count of songs released since the start of the previous calendar month.",
         "responses": {
           "200": {
             "description": "Catalogue totals.",
@@ -743,6 +743,25 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991
+                        },
+                        "recent_releases": {
+                          "type": "object",
+                          "properties": {
+                            "count": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "released_from": {
+                              "type": "string",
+                              "description": "Start of the window, YYYY-MM-DD."
+                            }
+                          },
+                          "required": [
+                            "count",
+                            "released_from"
+                          ],
+                          "description": "Published songs released since the start of the previous calendar month."
                         }
                       },
                       "required": [
@@ -752,7 +771,8 @@
                         "credits",
                         "earliest_year",
                         "genres",
-                        "labels"
+                        "labels",
+                        "recent_releases"
                       ]
                     }
                   },
@@ -1044,6 +1064,363 @@
                           "youtube_video_id",
                           "youtube_video_url",
                           "youtube_views",
+                          "youtube_views_per_day",
+                          "artists"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Total rows matching the query, ignoring page size and position."
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Page size actually applied. Bounded by apiConfig.maxLimit (80)."
+                        },
+                        "offset": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "limit",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/v1/songs/top": {
+      "get": {
+        "operationId": "getV1SongsTop",
+        "tags": [
+          "Songs"
+        ],
+        "summary": "List top songs by daily views",
+        "description": "Recent published songs ranked by a blended YouTube daily-view-rate and Spotify popularity score. Backs the homepage Top 10 rail. Only songs with artwork, a YouTube id and a known view rate are eligible.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 365,
+              "default": 14
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The ranked songs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "slug": {
+                            "type": "string",
+                            "description": "URL-safe form of the title. Not unique — pair it with the id."
+                          },
+                          "released_at": {
+                            "type": "string"
+                          },
+                          "artwork_url": {
+                            "type": "string",
+                            "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
+                          },
+                          "artwork_source": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "Custom",
+                                  "Apple Music",
+                                  "Spotify",
+                                  "YouTube"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "youtube_video_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "youtube_video_url": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "youtube_views": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "youtube_views_per_day": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "artists": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "name"
+                              ]
+                            },
+                            "description": "Primary performing credits only, in credit order."
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "slug",
+                          "released_at",
+                          "artwork_url",
+                          "artwork_source",
+                          "youtube_video_id",
+                          "youtube_video_url",
+                          "youtube_views",
+                          "youtube_views_per_day",
+                          "artists"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Total rows matching the query, ignoring page size and position."
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Page size actually applied. Bounded by apiConfig.maxLimit (80)."
+                        },
+                        "offset": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "limit",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/v1/songs/top-chart": {
+      "get": {
+        "operationId": "getV1SongsTopChart",
+        "tags": [
+          "Songs"
+        ],
+        "summary": "List top songs for a chart period",
+        "description": "Published songs ranked by chart score for the selected current, yearly, or all-time period. An optional genre limits the chart.",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "since-last-month",
+                "this-year",
+                "all-time"
+              ]
+            }
+          },
+          {
+            "name": "genre",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The ranked songs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "released_at": {
+                            "type": "string"
+                          },
+                          "artwork_url": {
+                            "type": "string"
+                          },
+                          "youtube_views_per_day": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "artists": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "name"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "released_at",
+                          "artwork_url",
                           "youtube_views_per_day",
                           "artists"
                         ]
@@ -1554,6 +1931,13 @@
                               "null"
                             ]
                           },
+                          "released_at": {
+                            "description": "Manual album release date, when available.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "position": {
                             "type": "integer",
                             "minimum": -9007199254740991,
@@ -1564,7 +1948,113 @@
                           "id",
                           "title",
                           "artwork_url",
+                          "released_at",
                           "position"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Total rows matching the query, ignoring page size and position."
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Page size actually applied. Bounded by apiConfig.maxLimit (80)."
+                        },
+                        "offset": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "limit",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/songs/{songId}/curated-lists": {
+      "get": {
+        "operationId": "getV1SongsBySongIdCuratedLists",
+        "tags": [
+          "Curated Lists"
+        ],
+        "summary": "List a song's curated lists",
+        "description": "Published public curated lists containing this published, non-deleted song, in curated order.",
+        "parameters": [
+          {
+            "name": "songId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The curated lists this song appears in.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "artwork_url": {
+                            "description": "Absolute CDN URL for the list artwork.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "artwork_url"
                         ],
                         "additionalProperties": false
                       }
@@ -2195,10 +2685,62 @@
           "Albums"
         ],
         "summary": "List albums",
-        "description": "Published albums with at least one published, non-deleted song. The list is returned whole rather than paginated.",
+        "description": "Published albums with at least one published, non-deleted song. Returned whole by default; pass `limit` to page through them instead, optionally with `keyword` and an order. `meta.total` is then the filtered total, not the page size.",
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Album search DSL over title and artist names (`artist:`, `year:`, `decade:`). Requires `limit`."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "maximum": 100
+            },
+            "description": "Page size. Omit to receive every album."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "order_column",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "released_at",
+                "song_count",
+                "title"
+              ],
+              "default": "released_at"
+            }
+          },
+          {
+            "name": "order_direction",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "All public albums.",
+            "description": "All public albums, or one page of them when `limit` is set.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2326,6 +2868,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           }
         }
       }
@@ -2510,11 +3055,6 @@
                                 },
                                 "description": "Primary performing credits only, in credit order."
                               },
-                              "position": {
-                                "type": "integer",
-                                "minimum": -9007199254740991,
-                                "maximum": 9007199254740991
-                              },
                               "date_type": {
                                 "anyOf": [
                                   {
@@ -2566,20 +3106,6 @@
                                 ],
                                 "description": "Canonical Spotify URL for this track."
                               },
-                              "spotify_popularity": {
-                                "default": null,
-                                "description": "Spotify popularity score, from 0 to 100.",
-                                "anyOf": [
-                                  {
-                                    "type": "integer",
-                                    "minimum": 0,
-                                    "maximum": 100
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
                               "apple_music_url": {
                                 "anyOf": [
                                   {
@@ -2591,6 +3117,11 @@
                                   }
                                 ],
                                 "description": "Apple Music URL for this track."
+                              },
+                              "position": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
                               }
                             },
                             "required": [
@@ -2605,13 +3136,12 @@
                               "youtube_views",
                               "youtube_views_per_day",
                               "artists",
-                              "position",
                               "date_type",
                               "duration_ms",
                               "youtube_duration_seconds",
                               "spotify_url",
-                              "spotify_popularity",
-                              "apple_music_url"
+                              "apple_music_url",
+                              "position"
                             ],
                             "additionalProperties": false
                           }
@@ -2934,6 +3464,187 @@
         }
       }
     },
+    "/v1/artists/top": {
+      "get": {
+        "operationId": "getV1ArtistsTop",
+        "tags": [
+          "Artists"
+        ],
+        "summary": "List top artists by credit role",
+        "description": "Top singers, composers, lyricists, producers, and mixers. Artists rank by distinct published song credits in each role. Genre and year filters apply to the ranked credits.",
+        "parameters": [
+          {
+            "name": "genre",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Top artist role charts and available filters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "charts": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "role": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "slug": {
+                                    "type": "string"
+                                  },
+                                  "title": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "slug",
+                                  "title"
+                                ]
+                              },
+                              "artists": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "prefix_title": {
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
+                                    },
+                                    "is_group": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "role_songs": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "avatar_url": {
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
+                                    },
+                                    "username": {
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
+                                    },
+                                    "country": {
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
+                                    },
+                                    "is_deceased": {
+                                      "type": "boolean"
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name",
+                                    "prefix_title",
+                                    "is_group",
+                                    "role_songs",
+                                    "avatar_url",
+                                    "username",
+                                    "country",
+                                    "is_deceased"
+                                  ]
+                                }
+                              }
+                            },
+                            "required": [
+                              "role",
+                              "artists"
+                            ]
+                          }
+                        },
+                        "genres": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "slug": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "slug",
+                              "title"
+                            ]
+                          }
+                        },
+                        "years": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        }
+                      },
+                      "required": [
+                        "charts",
+                        "genres",
+                        "years"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
     "/v1/artists/namesake-hints": {
       "get": {
         "operationId": "getV1ArtistsNamesakeHints",
@@ -3230,6 +3941,111 @@
                           "avatar_url",
                           "release_count"
                         ]
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Total rows matching the query, ignoring page size and position."
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Page size actually applied. Bounded by apiConfig.maxLimit (80)."
+                        },
+                        "offset": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "limit",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/v1/artists/credited": {
+      "get": {
+        "operationId": "getV1ArtistsCredited",
+        "tags": [
+          "Artists"
+        ],
+        "summary": "List credited artists",
+        "description": "Artists with at least one published song, ranked by song count, each with one representative role title. Backs the homepage credits card.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 90
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The credited artists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "role": {
+                            "type": "string",
+                            "description": "The artist's most primary credited role title."
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "role"
+                        ],
+                        "additionalProperties": false
                       }
                     },
                     "meta": {
@@ -4002,17 +4818,6 @@
               "maximum": 40,
               "default": 20
             }
-          },
-          {
-            "name": "raw",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "1"
-              ]
-            },
-            "description": "With `uri`+`from`, returns the untouched provider JSON instead of the normalized artwork shape. Used by apps/web to cache the full Spotify/Apple Music track payload on the song row."
           }
         ],
         "responses": {
@@ -4021,126 +4826,376 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "uri": {
-                            "type": "string"
-                          },
-                          "artist": {
-                            "type": "string"
-                          },
-                          "title": {
-                            "type": "string"
-                          },
-                          "release_date": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "artwork": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "artwork_medium": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "artwork_thumb": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "duration": {
-                            "anyOf": [
-                              {
-                                "type": "integer",
-                                "minimum": -9007199254740991,
-                                "maximum": 9007199254740991
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
                               },
-                              {
-                                "type": "null"
+                              "uri": {
+                                "type": "string"
+                              },
+                              "artist": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "release_date": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "artwork": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "artwork_medium": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "artwork_thumb": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "duration": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "from": {
+                                "type": "string",
+                                "enum": [
+                                  "apple",
+                                  "spotify"
+                                ]
                               }
-                            ]
-                          },
-                          "from": {
-                            "type": "string",
-                            "enum": [
-                              "apple",
-                              "spotify"
+                            },
+                            "required": [
+                              "id",
+                              "uri",
+                              "artist",
+                              "title",
+                              "release_date",
+                              "artwork",
+                              "artwork_medium",
+                              "artwork_thumb",
+                              "duration",
+                              "from"
                             ]
                           }
                         },
-                        "required": [
-                          "id",
-                          "uri",
-                          "artist",
-                          "title",
-                          "release_date",
-                          "artwork",
-                          "artwork_medium",
-                          "artwork_thumb",
-                          "duration",
-                          "from"
-                        ]
-                      }
-                    },
-                    "meta": {
-                      "type": "object",
-                      "properties": {
-                        "total": {
-                          "type": "integer",
-                          "minimum": -9007199254740991,
-                          "maximum": 9007199254740991,
-                          "description": "Total rows matching the query, ignoring page size and position."
-                        },
-                        "limit": {
-                          "type": "integer",
-                          "minimum": -9007199254740991,
-                          "maximum": 9007199254740991,
-                          "description": "Page size actually applied. Bounded by apiConfig.maxLimit (80)."
-                        },
-                        "offset": {
-                          "type": "integer",
-                          "minimum": -9007199254740991,
-                          "maximum": 9007199254740991,
-                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
-                        },
-                        "next_cursor": {
-                          "description": "Opaque cursor for the next page. Null means there is no next page.",
-                          "type": [
-                            "string",
-                            "null"
+                        "meta": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991,
+                              "description": "Total rows matching the query, ignoring page size and position."
+                            },
+                            "limit": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991,
+                              "description": "Page size actually applied. Bounded by apiConfig.maxLimit (80)."
+                            },
+                            "offset": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991,
+                              "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                            },
+                            "next_cursor": {
+                              "description": "Opaque cursor for the next page. Null means there is no next page.",
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "total",
+                            "limit",
+                            "offset"
                           ]
                         }
                       },
                       "required": [
-                        "total",
-                        "limit",
-                        "offset"
+                        "data",
+                        "meta"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "uri": {
+                                  "type": "string"
+                                },
+                                "artist": {
+                                  "type": "string"
+                                },
+                                "title": {
+                                  "type": "string"
+                                },
+                                "release_date": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "artwork": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "artwork_medium": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "artwork_thumb": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "duration": {
+                                  "anyOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "from": {
+                                  "type": "string",
+                                  "enum": [
+                                    "apple",
+                                    "spotify"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "uri",
+                                "artist",
+                                "title",
+                                "release_date",
+                                "artwork",
+                                "artwork_medium",
+                                "artwork_thumb",
+                                "duration",
+                                "from"
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "data"
                       ]
                     }
-                  },
-                  "required": [
-                    "data",
-                    "meta"
                   ]
                 }
               }
             }
+          },
+          "403": {
+            "description": "Origin/Referer is not diskograf.com."
+          }
+        }
+      }
+    },
+    "/v1/artworks/provider": {
+      "get": {
+        "operationId": "getV1ArtworksProvider",
+        "tags": [
+          "Search"
+        ],
+        "summary": "Look up slim provider metadata",
+        "description": "Looks up one Apple Music or Spotify track and returns only the provider fields Diskograf caches. Callable only from diskograf.com (Origin/Referer checked).",
+        "parameters": [
+          {
+            "name": "uri",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "A Spotify or Apple Music track URI or link."
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "apple",
+                "spotify"
+              ]
+            },
+            "description": "The provider used for the lookup."
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Two-letter storefront or market code. Defaults to `my`."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Slim provider metadata, or null when the track is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "anyOf": [
+                        {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "from": {
+                                  "type": "string",
+                                  "const": "spotify"
+                                },
+                                "id": {
+                                  "type": "string"
+                                },
+                                "popularity": {
+                                  "anyOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 100
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "duration_ms": {
+                                  "anyOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 9007199254740991
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "from",
+                                "id",
+                                "popularity",
+                                "duration_ms"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "from": {
+                                  "type": "string",
+                                  "const": "apple"
+                                },
+                                "track_id": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "collection_id": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "track_time_millis": {
+                                  "anyOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 9007199254740991
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "from",
+                                "track_id",
+                                "collection_id",
+                                "track_time_millis"
+                              ],
+                              "additionalProperties": false
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           },
           "403": {
             "description": "Origin/Referer is not diskograf.com."
@@ -4189,6 +5244,164 @@
           },
           "502": {
             "description": "The source image could not be downloaded."
+          }
+        }
+      }
+    },
+    "/v1/curated-lists": {
+      "get": {
+        "operationId": "getV1CuratedLists",
+        "tags": [
+          "Curated Lists"
+        ],
+        "summary": "List curated lists",
+        "description": "Published public curated lists in curated order, with song counts and artwork. Returned whole by default; pass `limit` to page through them instead, optionally with `keyword` and an order. `meta.total` is then the filtered total, not the page size.",
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Fuzzy search across the list title. Requires `limit`."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "maximum": 100
+            },
+            "description": "Page size. Omit to receive every list."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "order_column",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "position",
+                "title",
+                "updated_at"
+              ],
+              "default": "position"
+            }
+          },
+          {
+            "name": "order_direction",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "asc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The published curated lists, or one page of them when `limit` is set.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "artwork_url": {
+                            "description": "Absolute CDN URL for the list artwork.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "song_count": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "description": "When the list was last edited."
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "artwork_url",
+                          "song_count",
+                          "updated_at"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Total rows matching the query, ignoring page size and position."
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Page size actually applied. Bounded by apiConfig.maxLimit (80)."
+                        },
+                        "offset": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "limit",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           }
         }
       }
@@ -4242,6 +5455,20 @@
                             "string",
                             "null"
                           ]
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "description": "When the list was last edited. Drives the public page's freshness line."
+                        },
+                        "show_artists": {
+                          "default": true,
+                          "description": "Whether the tracklist metadata row shows artist names.",
+                          "type": "boolean"
+                        },
+                        "show_writers": {
+                          "default": false,
+                          "description": "Whether the tracklist metadata row shows writer (composer/lyricist) credits.",
+                          "type": "boolean"
                         },
                         "songs": {
                           "type": "array",
@@ -4339,6 +5566,90 @@
                                   ]
                                 },
                                 "description": "Primary performing credits only, in credit order."
+                              },
+                              "date_type": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": [
+                                      "FULL",
+                                      "MONTH",
+                                      "YEAR"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "duration_ms": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "youtube_duration_seconds": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "spotify_url": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "uri"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "description": "Canonical Spotify URL for this track."
+                              },
+                              "apple_music_url": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "uri"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "description": "Apple Music URL for this track."
+                              },
+                              "writers": {
+                                "default": [],
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name"
+                                  ]
+                                }
                               }
                             },
                             "required": [
@@ -4352,8 +5663,14 @@
                               "youtube_video_url",
                               "youtube_views",
                               "youtube_views_per_day",
-                              "artists"
-                            ]
+                              "artists",
+                              "date_type",
+                              "duration_ms",
+                              "youtube_duration_seconds",
+                              "spotify_url",
+                              "apple_music_url"
+                            ],
+                            "additionalProperties": false
                           }
                         }
                       },
@@ -4362,6 +5679,7 @@
                         "title",
                         "description",
                         "artwork_url",
+                        "updated_at",
                         "songs"
                       ],
                       "additionalProperties": false
@@ -4376,6 +5694,101 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/curated-lists/{listId}/artwork": {
+      "get": {
+        "operationId": "getV1CuratedListsByListIdArtwork",
+        "tags": [
+          "Curated Lists"
+        ],
+        "summary": "List a curated list's song artwork",
+        "description": "Song ids and artwork URLs for one published list, in curated order. Unlike the detail route this also serves `internal` lists, which have no public page — it exposes no list title, description or membership beyond artwork the catalogue already serves. Returns an empty list for an unpublished or missing list.",
+        "parameters": [
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list's song artwork.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "artwork_url": {
+                            "type": "string",
+                            "description": "Absolute CDN URL for the song artwork."
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "artwork_url"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Total rows matching the query, ignoring page size and position."
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Page size actually applied. Bounded by apiConfig.maxLimit (80)."
+                        },
+                        "offset": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "limit",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
           }
         }
       }
@@ -5176,6 +6589,18 @@
                             "string",
                             "null"
                           ]
+                        },
+                        "image_url": {
+                          "description": "Absolute CDN URL for the genre artwork.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "song_count": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
                         }
                       },
                       "required": [
@@ -5183,7 +6608,9 @@
                         "slug",
                         "title",
                         "description",
-                        "color"
+                        "color",
+                        "image_url",
+                        "song_count"
                       ]
                     }
                   },
@@ -5529,6 +6956,171 @@
                           "name",
                           "slug",
                           "song_count"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Total rows matching the query, ignoring page size and position."
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Page size actually applied. Bounded by apiConfig.maxLimit (80)."
+                        },
+                        "offset": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "limit",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/v1/labels/top": {
+      "get": {
+        "operationId": "getV1LabelsTop",
+        "tags": [
+          "Labels"
+        ],
+        "summary": "List top record-label charts",
+        "description": "The ten highest-ranked labels, each with up to ten top published songs for the selected period.",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "since-last-month",
+                "all-time"
+              ],
+              "default": "since-last-month"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Top label charts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "label": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ]
+                          },
+                          "songs": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                "title": {
+                                  "type": "string"
+                                },
+                                "released_at": {
+                                  "type": "string"
+                                },
+                                "artwork_url": {
+                                  "type": "string"
+                                },
+                                "youtube_views_per_day": {
+                                  "anyOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "artists": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "name"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "title",
+                                "released_at",
+                                "artwork_url",
+                                "youtube_views_per_day",
+                                "artists"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "label",
+                          "songs"
                         ]
                       }
                     },
@@ -7988,6 +9580,409 @@
         }
       }
     },
+    "/v1/admin/songs/{songId}": {
+      "get": {
+        "operationId": "getV1AdminSongsBySongId",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Get a song preview (backstage)",
+        "description": "Authenticated, admin-only. Slim publish-confirmation data for one song. It includes completeness fields and credit names, but never sends lyrics, notes, or raw provider JSON. Requires a short-lived token minted by diskograf.com.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "songId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The publish preview payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "released_at": {
+                          "type": "string"
+                        },
+                        "published_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "data": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "youtube": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "artwork": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "artworkMedium": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "artworkThumb": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "artworkCustom": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "spotify": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "applemusic": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "dateType": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "enum": [
+                                        "FULL",
+                                        "MONTH",
+                                        "YEAR"
+                                      ]
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "youtube",
+                                "artwork",
+                                "artworkMedium",
+                                "artworkThumb",
+                                "artworkCustom",
+                                "spotify",
+                                "applemusic",
+                                "dateType"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "youtube_data": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "title": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "title"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "artists": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "order": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "artist": {
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "type": "integer",
+                                        "minimum": -9007199254740991,
+                                        "maximum": 9007199254740991
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "role": {
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "title": {
+                                        "type": "string"
+                                      },
+                                      "tag": {
+                                        "type": [
+                                          "string",
+                                          "null"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "title",
+                                      "tag"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "order",
+                              "artist",
+                              "role"
+                            ]
+                          }
+                        },
+                        "genres": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "genre": {
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "title": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "title"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "genre"
+                            ]
+                          }
+                        },
+                        "labels": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "label": {
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "name"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "label"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "released_at",
+                        "published_at",
+                        "data",
+                        "youtube_data",
+                        "artists",
+                        "genres",
+                        "labels"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/songs/{songId}/content": {
+      "get": {
+        "operationId": "getV1AdminSongsBySongIdContent",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Get song content (backstage)",
+        "description": "Authenticated, admin-only. Returns lyrics and editorial notes for the on-demand Backstage drawer. Requires a short-lived token minted by diskograf.com.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "songId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The song content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "lyrics": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "notes": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "lyrics",
+                        "notes"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
     "/v1/admin/stats": {
       "get": {
         "operationId": "getV1AdminStats",
@@ -8472,6 +10467,346 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/artists/{artistId}": {
+      "get": {
+        "operationId": "getV1AdminArtistsByArtistId",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Get an artist editor detail (backstage)",
+        "description": "Authenticated, admin-only. Returns the named profile fields needed by the artist editor. Raw profile JSON is never returned.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "artistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The artist editor detail.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "prefix_title": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "is_group": {
+                          "type": [
+                            "boolean",
+                            "null"
+                          ]
+                        },
+                        "aliases": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "disambiguator": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "username": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "user_image": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "avatar": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "b2_avatar": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "country": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "place": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "birth_date": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "birth_place": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "death_date": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "death_place": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "show_age": {
+                              "type": "boolean"
+                            },
+                            "primary_job": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "biodata": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "instagram": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "twitter": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "tiktok": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "youtube": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "facebook": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "website": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "spotify": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "applemusic": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "is_deceased": {
+                              "type": "boolean"
+                            },
+                            "alias_artists": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "prefix_title": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name",
+                                  "prefix_title"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "avatar",
+                            "b2_avatar",
+                            "country",
+                            "place",
+                            "birth_date",
+                            "birth_place",
+                            "death_date",
+                            "death_place",
+                            "show_age",
+                            "primary_job",
+                            "biodata",
+                            "instagram",
+                            "twitter",
+                            "tiktok",
+                            "youtube",
+                            "facebook",
+                            "website",
+                            "spotify",
+                            "applemusic",
+                            "is_deceased",
+                            "alias_artists"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "associated_acts": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "order": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "artist": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "prefix_title": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "avatar_url": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name",
+                                  "prefix_title",
+                                  "avatar_url"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "order",
+                              "artist"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "prefix_title",
+                        "is_group",
+                        "aliases",
+                        "disambiguator",
+                        "username",
+                        "user_image",
+                        "data",
+                        "associated_acts"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
@@ -9295,6 +11630,850 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/albums": {
+      "get": {
+        "operationId": "getV1AdminAlbums",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "List albums (backstage)",
+        "description": "Authenticated, admin-only. One page of albums, drafts included, with song counts and display artists. Requires a short-lived token minted by diskograf.com. `keyword` accepts the album search DSL (`artist:`, `year:`, `decade:`).",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Album search DSL over title and artist names."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "order_column",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "added",
+                "artist",
+                "released",
+                "title",
+                "updated"
+              ],
+              "default": "updated"
+            }
+          },
+          {
+            "name": "order_direction",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of albums.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "album_type": {
+                            "type": "string",
+                            "enum": [
+                              "album",
+                              "ep",
+                              "single"
+                            ]
+                          },
+                          "artwork_url": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "draft",
+                              "published"
+                            ]
+                          },
+                          "released_at": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          },
+                          "song_count": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "artists": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "prefix_title": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "name",
+                                "prefix_title"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "album_type",
+                          "artwork_url",
+                          "status",
+                          "released_at",
+                          "created_at",
+                          "updated_at",
+                          "song_count",
+                          "artists"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Total rows matching the query, ignoring page size and position."
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Page size actually applied. Bounded by apiConfig.maxLimit (80)."
+                        },
+                        "offset": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "limit",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/albums/{albumId}": {
+      "get": {
+        "operationId": "getV1AdminAlbumsByAlbumId",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Get an album (backstage)",
+        "description": "Authenticated, admin-only. Full editor data for one album, including unpublished song memberships and ordered artists and labels. Raw song and artist JSON is never returned. Requires a short-lived token minted by diskograf.com.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "albumId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The album editor payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "album_type": {
+                          "type": "string",
+                          "enum": [
+                            "album",
+                            "ep",
+                            "single"
+                          ]
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "draft",
+                            "published"
+                          ]
+                        },
+                        "artwork_song_id": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "released_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "artists": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "prefix_title": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "is_group": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "avatar_url": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "position": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "prefix_title",
+                              "is_group",
+                              "avatar_url",
+                              "position"
+                            ]
+                          }
+                        },
+                        "labels": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "position": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "position"
+                            ]
+                          }
+                        },
+                        "songs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "released_at": {
+                                "type": "string"
+                              },
+                              "artwork_url": {
+                                "type": "string"
+                              },
+                              "artists": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name"
+                                  ]
+                                }
+                              },
+                              "position": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "published_at": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "deleted_at": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "title",
+                              "released_at",
+                              "artwork_url",
+                              "artists",
+                              "position",
+                              "published_at",
+                              "deleted_at"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "album_type",
+                        "status",
+                        "artwork_song_id",
+                        "released_at",
+                        "artists",
+                        "labels",
+                        "songs"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/curated-lists": {
+      "get": {
+        "operationId": "getV1AdminCuratedLists",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "List curated lists (backstage)",
+        "description": "Authenticated, admin-only. One page of curated lists, including drafts, archived lists and `internal` lists that have no public page. Requires a short-lived token minted by diskograf.com.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Fuzzy search across the list title."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "order_column",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "added",
+                "position",
+                "title",
+                "updated"
+              ],
+              "default": "added"
+            }
+          },
+          {
+            "name": "order_direction",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of curated lists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "artwork_url": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "list_type": {
+                            "type": "string",
+                            "enum": [
+                              "public",
+                              "internal"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "draft",
+                              "published",
+                              "archived"
+                            ]
+                          },
+                          "position": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          },
+                          "song_count": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "description",
+                          "artwork_url",
+                          "list_type",
+                          "status",
+                          "position",
+                          "created_at",
+                          "updated_at",
+                          "song_count"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Total rows matching the query, ignoring page size and position."
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Page size actually applied. Bounded by apiConfig.maxLimit (80)."
+                        },
+                        "offset": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "limit",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/curated-lists/{listId}": {
+      "get": {
+        "operationId": "getV1AdminCuratedListsByListId",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Get a curated list (backstage)",
+        "description": "Authenticated, admin-only. Full editor data for one curated list, including draft and internal metadata. Song rows contain only published, non-deleted catalogue cards. Requires a short-lived token minted by diskograf.com.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The curated-list editor payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "artwork_song_id": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "list_type": {
+                          "type": "string",
+                          "enum": [
+                            "public",
+                            "internal"
+                          ]
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "draft",
+                            "published",
+                            "archived"
+                          ]
+                        },
+                        "show_artists": {
+                          "type": "boolean"
+                        },
+                        "show_writers": {
+                          "type": "boolean"
+                        },
+                        "songs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "released_at": {
+                                "type": "string"
+                              },
+                              "artwork_url": {
+                                "type": "string"
+                              },
+                              "artists": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name"
+                                  ]
+                                }
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "title",
+                              "released_at",
+                              "artwork_url",
+                              "artists"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "description",
+                        "artwork_song_id",
+                        "list_type",
+                        "status",
+                        "show_artists",
+                        "show_writers",
+                        "songs"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
