@@ -2109,6 +2109,230 @@
         }
       }
     },
+    "/v1/songs/{songId}/provider-stats": {
+      "get": {
+        "operationId": "getV1SongsBySongIdProviderStats",
+        "tags": [
+          "Songs"
+        ],
+        "summary": "Get stored provider stats",
+        "description": "The YouTube, Spotify, and Apple Music snapshots stored for a published song. This route never calls a provider. Compare ids and `last_fetched` to decide whether a snapshot is stale.",
+        "parameters": [
+          {
+            "name": "songId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The stored provider stats.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "youtube": {
+                          "type": "object",
+                          "properties": {
+                            "video_id": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "views": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "views_per_day": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "duration_seconds": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            },
+                            "last_fetched": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "video_id",
+                            "views",
+                            "views_per_day",
+                            "duration_seconds",
+                            "last_fetched"
+                          ]
+                        },
+                        "spotify": {
+                          "type": "object",
+                          "properties": {
+                            "track_id": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "popularity": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "last_fetched": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "track_id",
+                            "popularity",
+                            "last_fetched"
+                          ]
+                        },
+                        "apple_music": {
+                          "type": "object",
+                          "properties": {
+                            "track_id": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "last_fetched": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "track_id",
+                            "last_fetched"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "youtube",
+                        "spotify",
+                        "apple_music"
+                      ],
+                      "description": "Stored provider snapshots. Clients compare ids and last_fetched to decide whether a refresh is due."
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/songs/{songId}/views": {
+      "get": {
+        "operationId": "getV1SongsBySongIdViews",
+        "tags": [
+          "Songs"
+        ],
+        "summary": "Get song page views",
+        "description": "Site page views for one song over the last 12 months, read from Diskograf analytics. Every URL form of the song counts once. `views` is null when analytics is unavailable.",
+        "parameters": [
+          {
+            "name": "songId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The view count.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "views": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "description": "Site page views over the last 12 months. Null when analytics is unavailable."
+                        }
+                      },
+                      "required": [
+                        "views"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
     "/v1/songs/{songId}/similar": {
       "get": {
         "operationId": "getV1SongsBySongIdSimilar",
@@ -3453,187 +3677,6 @@
                   "required": [
                     "data",
                     "meta"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          }
-        }
-      }
-    },
-    "/v1/artists/top": {
-      "get": {
-        "operationId": "getV1ArtistsTop",
-        "tags": [
-          "Artists"
-        ],
-        "summary": "List top artists by credit role",
-        "description": "Top singers, composers, lyricists, producers, and mixers. Artists rank by distinct published song credits in each role. Genre and year filters apply to the ranked credits.",
-        "parameters": [
-          {
-            "name": "genre",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "year",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Top artist role charts and available filters.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "charts": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "role": {
-                                "type": "object",
-                                "properties": {
-                                  "id": {
-                                    "type": "integer",
-                                    "minimum": -9007199254740991,
-                                    "maximum": 9007199254740991
-                                  },
-                                  "slug": {
-                                    "type": "string"
-                                  },
-                                  "title": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "id",
-                                  "slug",
-                                  "title"
-                                ]
-                              },
-                              "artists": {
-                                "type": "array",
-                                "items": {
-                                  "type": "object",
-                                  "properties": {
-                                    "id": {
-                                      "type": "integer",
-                                      "minimum": -9007199254740991,
-                                      "maximum": 9007199254740991
-                                    },
-                                    "name": {
-                                      "type": "string"
-                                    },
-                                    "prefix_title": {
-                                      "type": [
-                                        "string",
-                                        "null"
-                                      ]
-                                    },
-                                    "is_group": {
-                                      "type": [
-                                        "boolean",
-                                        "null"
-                                      ]
-                                    },
-                                    "role_songs": {
-                                      "type": "integer",
-                                      "minimum": -9007199254740991,
-                                      "maximum": 9007199254740991
-                                    },
-                                    "avatar_url": {
-                                      "type": [
-                                        "string",
-                                        "null"
-                                      ]
-                                    },
-                                    "username": {
-                                      "type": [
-                                        "string",
-                                        "null"
-                                      ]
-                                    },
-                                    "country": {
-                                      "type": [
-                                        "string",
-                                        "null"
-                                      ]
-                                    },
-                                    "is_deceased": {
-                                      "type": "boolean"
-                                    }
-                                  },
-                                  "required": [
-                                    "id",
-                                    "name",
-                                    "prefix_title",
-                                    "is_group",
-                                    "role_songs",
-                                    "avatar_url",
-                                    "username",
-                                    "country",
-                                    "is_deceased"
-                                  ]
-                                }
-                              }
-                            },
-                            "required": [
-                              "role",
-                              "artists"
-                            ]
-                          }
-                        },
-                        "genres": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "slug": {
-                                "type": "string"
-                              },
-                              "title": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "slug",
-                              "title"
-                            ]
-                          }
-                        },
-                        "years": {
-                          "type": "array",
-                          "items": {
-                            "type": "integer",
-                            "minimum": -9007199254740991,
-                            "maximum": 9007199254740991
-                          }
-                        }
-                      },
-                      "required": [
-                        "charts",
-                        "genres",
-                        "years"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "data"
                   ]
                 }
               }
@@ -7016,7 +7059,7 @@
           "Labels"
         ],
         "summary": "List top record-label charts",
-        "description": "The ten highest-ranked labels, each with up to ten top published songs for the selected period.",
+        "description": "The ten highest-ranked labels, each with up to ten top published songs for the selected period. The label ranking itself does not depend on `period`; only each label's songs do.",
         "parameters": [
           {
             "name": "period",
@@ -9983,6 +10026,1010 @@
         }
       }
     },
+    "/v1/admin/songs/{songId}/refresh-youtube": {
+      "patch": {
+        "operationId": "patchV1AdminSongsBySongIdRefreshYoutube",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Force-refresh a song's YouTube metadata (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "songId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The video's publication date.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "date": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "date"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/songs/{songId}/links": {
+      "patch": {
+        "operationId": "patchV1AdminSongsBySongIdLinks",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Update a song's external links (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header. A changed YouTube ID always fetches fresh metadata.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "songId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "youtube": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "spotify": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "applemusic": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "youtube",
+                  "spotify",
+                  "applemusic"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Whether the links actually changed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "song_id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "changed": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "song_id",
+                        "changed"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/songs/{songId}/restore": {
+      "patch": {
+        "operationId": "patchV1AdminSongsBySongIdRestore",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Restore a soft-deleted song (backstage)",
+        "description": "Authenticated, super-only, write-scoped. Requires a `write`-scope backstage token minted for a super user and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "songId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The restored song.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "deleted_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "artist_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "genre_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "label_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "deleted_at",
+                        "artist_ids",
+                        "genre_ids",
+                        "label_ids"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The token does not belong to a super user."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/songs/{songId}/publish": {
+      "patch": {
+        "operationId": "patchV1AdminSongsBySongIdPublish",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Publish a song (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "songId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The published song, plus the artist/genre/label ids to revalidate.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "published_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "artist_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "genre_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "label_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "published_at",
+                        "artist_ids",
+                        "genre_ids",
+                        "label_ids"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/songs/{songId}/unpublish": {
+      "patch": {
+        "operationId": "patchV1AdminSongsBySongIdUnpublish",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Unpublish a song (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header. Song owners self-unpublishing their own songs still go through the tRPC path — not exposed here.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "songId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The unpublished song, plus the artist/genre/label ids to revalidate.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "published_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "artist_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "genre_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "label_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "published_at",
+                        "artist_ids",
+                        "genre_ids",
+                        "label_ids"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/songs/bulk-publish": {
+      "patch": {
+        "operationId": "patchV1AdminSongsBulkPublish",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Publish several songs at once (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Up to 200 ids. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "song_ids": {
+                    "minItems": 1,
+                    "maxItems": 200,
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  }
+                },
+                "required": [
+                  "song_ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The published songs, plus the artist/genre/label ids to revalidate for each.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "songs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "published_at": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "artist_ids": {
+                                "type": "array",
+                                "items": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                }
+                              },
+                              "genre_ids": {
+                                "type": "array",
+                                "items": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                }
+                              },
+                              "label_ids": {
+                                "type": "array",
+                                "items": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                }
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "published_at",
+                              "artist_ids",
+                              "genre_ids",
+                              "label_ids"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "songs"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/songs/bulk-unpublish": {
+      "patch": {
+        "operationId": "patchV1AdminSongsBulkUnpublish",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Unpublish several songs at once (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Up to 200 ids. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "song_ids": {
+                    "minItems": 1,
+                    "maxItems": 200,
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  }
+                },
+                "required": [
+                  "song_ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The unpublished songs, plus the artist/genre/label ids to revalidate for each.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "songs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "published_at": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "artist_ids": {
+                                "type": "array",
+                                "items": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                }
+                              },
+                              "genre_ids": {
+                                "type": "array",
+                                "items": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                }
+                              },
+                              "label_ids": {
+                                "type": "array",
+                                "items": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                }
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "published_at",
+                              "artist_ids",
+                              "genre_ids",
+                              "label_ids"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "songs"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/songs/bulk-delete": {
+      "patch": {
+        "operationId": "patchV1AdminSongsBulkDelete",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Soft-delete several songs at once (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Up to 200 ids. Requires a `write`-scope backstage token and an `Idempotency-Key` header. Aborts the whole batch if any selected song is still published.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "song_ids": {
+                    "minItems": 1,
+                    "maxItems": 200,
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  }
+                },
+                "required": [
+                  "song_ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The soft-deleted songs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "songs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "deleted_at": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "deleted_at"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "songs"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/songs/{songId}/permanent": {
+      "delete": {
+        "operationId": "deleteV1AdminSongsBySongIdPermanent",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Permanently delete a trashed song (backstage)",
+        "description": "Authenticated, super-only, write-scoped. Requires a `write`-scope backstage token minted for a super user and an `Idempotency-Key` header. Irreversible — only allowed on an already soft-deleted song.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "songId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deleted song id.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The token does not belong to a super user."
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
     "/v1/admin/stats": {
       "get": {
         "operationId": "getV1AdminStats",
@@ -10474,6 +11521,203 @@
         }
       }
     },
+    "/v1/admin/artists/top": {
+      "get": {
+        "operationId": "getV1AdminArtistsTop",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "List top artists by credit role (backstage)",
+        "description": "Authenticated, super-only. Top singers, composers, lyricists, producers, and mixers. Artists rank by distinct published song credits in each role. Genre and year filters apply to the ranked credits.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "genre",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Genre slug."
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Release year."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Top artist role charts and available filters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "charts": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "role": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "slug": {
+                                    "type": "string"
+                                  },
+                                  "title": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "slug",
+                                  "title"
+                                ]
+                              },
+                              "artists": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "prefix_title": {
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
+                                    },
+                                    "is_group": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "role_songs": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "avatar_url": {
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
+                                    },
+                                    "username": {
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
+                                    },
+                                    "country": {
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
+                                    },
+                                    "is_deceased": {
+                                      "type": "boolean"
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name",
+                                    "prefix_title",
+                                    "is_group",
+                                    "role_songs",
+                                    "avatar_url",
+                                    "username",
+                                    "country",
+                                    "is_deceased"
+                                  ]
+                                }
+                              }
+                            },
+                            "required": [
+                              "role",
+                              "artists"
+                            ]
+                          }
+                        },
+                        "genres": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "slug": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "slug",
+                              "title"
+                            ]
+                          }
+                        },
+                        "years": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        }
+                      },
+                      "required": [
+                        "charts",
+                        "genres",
+                        "years"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The token does not belong to a super user."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
     "/v1/admin/artists/{artistId}": {
       "get": {
         "operationId": "getV1AdminArtistsByArtistId",
@@ -10812,6 +12056,1004 @@
             "$ref": "#/components/responses/RateLimited"
           }
         }
+      },
+      "patch": {
+        "operationId": "patchV1AdminArtistsByArtistId",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Update an artist's backstage-editable fields (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header. Never touches artwork — the avatar upload path stays on the existing tRPC procedure.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "artistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "prefix_title": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 100
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "is_group": {
+                    "type": "boolean"
+                  },
+                  "aliases": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "alias_artists": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "prefix_title": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name"
+                      ]
+                    }
+                  },
+                  "country": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 100
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "place": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "birth_date": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 20
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "birth_place": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "death_date": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 20
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "death_place": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "show_age": {
+                    "type": "boolean"
+                  },
+                  "primary_job": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "biodata": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 5000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "instagram": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "twitter": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "tiktok": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "youtube": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "facebook": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "website": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "spotify": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "applemusic": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "is_deceased": {
+                    "type": "boolean"
+                  },
+                  "disambiguator": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 120
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "collaborators": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "artist_id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "order": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "artist_id",
+                        "order"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "is_group",
+                  "show_age",
+                  "is_deceased"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The artist's updated fields.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "prefix_title": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "is_group": {
+                          "type": [
+                            "boolean",
+                            "null"
+                          ]
+                        },
+                        "aliases": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "prefix_title",
+                        "is_group",
+                        "aliases"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteV1AdminArtistsByArtistId",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Delete an artist (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header. Refuses an artist with a linked user account, song credits, collaborator links, or remaining role assignments.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "artistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deleted artist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/artists/recalc-totals": {
+      "patch": {
+        "operationId": "patchV1AdminArtistsRecalcTotals",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Recompute artists' song/credit totals (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header. Recomputes every artist's total_songs/total_credits from song_artist — safe to run repeatedly.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "How many artist rows changed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "updated": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "updated"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/artists/rebuild-role-assignments": {
+      "patch": {
+        "operationId": "patchV1AdminArtistsRebuildRoleAssignments",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Rebuild the derived artist_role index (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header. Additive and safe to run repeatedly.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "How many artist_role rows were inserted, and how many distinct artists they touched.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "inserted": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "artists": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "inserted",
+                        "artists"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/artists/{artistId}/role-assignments": {
+      "patch": {
+        "operationId": "patchV1AdminArtistsByArtistIdRoleAssignments",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Remove an artist's role assignments (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header. Refuses if the artist has a linked user account, a song credit, or a collaborator link.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "artistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "How many role assignments were removed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "artist_id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "removed": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "artist_id",
+                        "removed"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/artists/mark-not-duplicate": {
+      "patch": {
+        "operationId": "patchV1AdminArtistsMarkNotDuplicate",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Mark two artists as not duplicates (backstage)",
+        "description": "Authenticated, super-only, write-scoped. Requires a `write`-scope backstage token minted for a super user and an `Idempotency-Key` header. Requires a disambiguator on at least one side when the two names collide.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "a_id": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "b_id": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "disambiguator_a": {
+                    "type": "string",
+                    "maxLength": 120
+                  },
+                  "disambiguator_b": {
+                    "type": "string",
+                    "maxLength": 120
+                  }
+                },
+                "required": [
+                  "a_id",
+                  "b_id"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The ordered artist pair now recorded as not duplicates.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "a_id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "b_id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "a_id",
+                        "b_id"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The token does not belong to a super user."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/artists/{artistId}/avatar-remove": {
+      "patch": {
+        "operationId": "patchV1AdminArtistsByArtistIdAvatarRemove",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Remove an artist's avatar (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header. Rejected when the artist links to a user account — that image is owned by the account.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "artistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The artist row after the avatar was cleared.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/artists/merge": {
+      "patch": {
+        "operationId": "patchV1AdminArtistsMerge",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Merge two artists (backstage)",
+        "description": "Authenticated, super-only, write-scoped. Requires a `write`-scope backstage token minted for a super user and an `Idempotency-Key` header. Folds `loser_id` into `survivor_id` and hard-deletes the loser. Refuses a merge when the two artists have conflicting linked user accounts.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "survivor_id": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "loser_id": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "survivor_id",
+                  "loser_id"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The surviving artist, with both artists' linked usernames for cache invalidation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "survivor_id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "survivor_name": {
+                          "type": "string"
+                        },
+                        "survivor_username": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "loser_username": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "survivor_id",
+                        "survivor_name",
+                        "survivor_username",
+                        "loser_username"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The token does not belong to a super user."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
       }
     },
     "/v1/admin/labels": {
@@ -11012,6 +13254,304 @@
             "$ref": "#/components/responses/RateLimited"
           }
         }
+      },
+      "post": {
+        "operationId": "postV1AdminLabels",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Create a label (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header. Refuses a name that collides (case/diacritic-insensitive) with an existing label.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The created label.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/labels/{id}": {
+      "patch": {
+        "operationId": "patchV1AdminLabelsById",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Update a label's name, company name or status (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header. Only the supplied fields change.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "company_name": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "active",
+                      "defunct"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The label's updated details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "company_name": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "active",
+                            "defunct"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "company_name",
+                        "status"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteV1AdminLabelsById",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Delete a label (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deleted label.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
       }
     },
     "/v1/admin/genres": {
@@ -11164,6 +13704,297 @@
             "$ref": "#/components/responses/RateLimited"
           }
         }
+      },
+      "post": {
+        "operationId": "postV1AdminGenres",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Create a genre (backstage)",
+        "description": "Authenticated, super-only, write-scoped. Requires a `write`-scope backstage token minted for a super user and an `Idempotency-Key` header. Does not set artwork — use /api/genre-image-upload after creating.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "slug": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "color": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 20
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "description": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "title",
+                  "slug"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The created genre.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "slug": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "color": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "description": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "slug",
+                        "color",
+                        "description"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The token does not belong to a super user."
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/genres/{id}": {
+      "patch": {
+        "operationId": "patchV1AdminGenresById",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Update a genre's title, slug, color or description (backstage)",
+        "description": "Authenticated, super-only, write-scoped. Requires a `write`-scope backstage token minted for a super user and an `Idempotency-Key` header. Only the supplied fields change. Does not touch artwork — use /api/genre-image-upload for that.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "slug": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "color": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 20
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "description": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The genre's updated details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "slug": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "color": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "description": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "slug",
+                        "color",
+                        "description"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The token does not belong to a super user."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
       }
     },
     "/v1/admin/roles": {
@@ -11311,6 +14142,365 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      },
+      "post": {
+        "operationId": "postV1AdminRoles",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Create a role (backstage)",
+        "description": "Authenticated, super-only, write-scoped. Requires a `write`-scope backstage token minted for a super user and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "slug": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "description": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "order": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "tag": {
+                    "type": "string",
+                    "enum": [
+                      "musician",
+                      "primary",
+                      "technical",
+                      "visual",
+                      "writing"
+                    ]
+                  },
+                  "icon_class": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                },
+                "required": [
+                  "title",
+                  "slug",
+                  "order",
+                  "tag",
+                  "icon_class"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The created role.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "slug": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "description": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "order": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "tag": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "icon_class": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "slug",
+                        "description",
+                        "order",
+                        "tag",
+                        "icon_class"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The token does not belong to a super user."
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/roles/{id}": {
+      "patch": {
+        "operationId": "patchV1AdminRolesById",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Update a role (backstage)",
+        "description": "Authenticated, super-only, write-scoped. Requires a `write`-scope backstage token minted for a super user and an `Idempotency-Key` header. Replaces every editable field — no partial updates.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "slug": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "description": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "order": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "tag": {
+                    "type": "string",
+                    "enum": [
+                      "musician",
+                      "primary",
+                      "technical",
+                      "visual",
+                      "writing"
+                    ]
+                  },
+                  "icon_class": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                },
+                "required": [
+                  "title",
+                  "slug",
+                  "order",
+                  "tag",
+                  "icon_class"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The role's updated details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "slug": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "description": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "order": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "tag": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "icon_class": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "slug",
+                        "description",
+                        "order",
+                        "tag",
+                        "icon_class"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The token does not belong to a super user."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
@@ -11637,6 +14827,352 @@
         }
       }
     },
+    "/v1/admin/users/{id}/flag": {
+      "patch": {
+        "operationId": "patchV1AdminUsersByIdFlag",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Flag or unflag a user (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "flagged": {
+                    "type": "boolean"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "flagged"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The user's updated flag status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "is_flagged": {
+                          "type": "boolean"
+                        },
+                        "flag_reason": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "is_flagged",
+                        "flag_reason"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/users/{id}/ban": {
+      "patch": {
+        "operationId": "patchV1AdminUsersByIdBan",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Ban or unban a user (backstage)",
+        "description": "Authenticated, super-only, write-scoped. Requires a `write`-scope backstage token minted for a super user and an `Idempotency-Key` header. Banning force-logs-out the account by deleting its sessions.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "banned": {
+                    "type": "boolean"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "banned"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The user's updated ban status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "banned": {
+                          "type": "boolean"
+                        },
+                        "ban_reason": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "banned",
+                        "ban_reason"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The token does not belong to a super user."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/users/{id}/role": {
+      "patch": {
+        "operationId": "patchV1AdminUsersByIdRole",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Promote or revoke a user's admin/super role (backstage)",
+        "description": "Authenticated, super-only, write-scoped. Requires a `write`-scope backstage token minted for a super user and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "promote-admin",
+                      "promote-super",
+                      "revoke-admin",
+                      "revoke-super"
+                    ]
+                  }
+                },
+                "required": [
+                  "action"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The user's updated role flags.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "is_admin": {
+                          "type": [
+                            "boolean",
+                            "null"
+                          ]
+                        },
+                        "is_super": {
+                          "type": [
+                            "boolean",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "is_admin",
+                        "is_super"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The token does not belong to a super user."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
     "/v1/admin/albums": {
       "get": {
         "operationId": "getV1AdminAlbums",
@@ -11854,6 +15390,111 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      },
+      "post": {
+        "operationId": "postV1AdminAlbums",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Create an album (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "album_type": {
+                    "type": "string",
+                    "enum": [
+                      "album",
+                      "ep",
+                      "single"
+                    ]
+                  },
+                  "released_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "title",
+                  "album_type",
+                  "released_at"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The created album.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
@@ -12112,6 +15753,807 @@
             "$ref": "#/components/responses/RateLimited"
           }
         }
+      },
+      "patch": {
+        "operationId": "patchV1AdminAlbumsByAlbumId",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Update an album (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "albumId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "album_type": {
+                    "type": "string",
+                    "enum": [
+                      "album",
+                      "ep",
+                      "single"
+                    ]
+                  },
+                  "released_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "title",
+                  "album_type",
+                  "released_at"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated album.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/albums/with-songs": {
+      "post": {
+        "operationId": "postV1AdminAlbumsWithSongs",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Create an album with songs (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Combined create+populate — only published, non-deleted songs are accepted. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "album_type": {
+                    "type": "string",
+                    "enum": [
+                      "album",
+                      "ep",
+                      "single"
+                    ]
+                  },
+                  "released_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "song_ids": {
+                    "minItems": 1,
+                    "maxItems": 50,
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  }
+                },
+                "required": [
+                  "title",
+                  "album_type",
+                  "released_at",
+                  "song_ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The created album and counts of songs added/skipped.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "album_id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "album_title": {
+                          "type": "string"
+                        },
+                        "added_count": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "skipped_count": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "album_id",
+                        "album_title",
+                        "added_count",
+                        "skipped_count"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/albums/{albumId}/status": {
+      "patch": {
+        "operationId": "patchV1AdminAlbumsByAlbumIdStatus",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Set an album's status (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Publishing requires at least one published, non-deleted song member. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "albumId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "draft",
+                      "published"
+                    ]
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The album's new status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "draft",
+                            "published"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "status"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/albums/{albumId}/songs": {
+      "patch": {
+        "operationId": "patchV1AdminAlbumsByAlbumIdSongs",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Replace an album's songs (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Full membership replace — only published, non-deleted songs are accepted. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "albumId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "song_ids": {
+                    "maxItems": 50,
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  }
+                },
+                "required": [
+                  "song_ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The album's new song count.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "song_count": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "song_count"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/albums/{albumId}/songs/append": {
+      "patch": {
+        "operationId": "patchV1AdminAlbumsByAlbumIdSongsAppend",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Add songs to an album (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Incremental add — already-present songs are skipped, the 1000-song cap is enforced across existing+new. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "albumId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "song_ids": {
+                    "minItems": 1,
+                    "maxItems": 50,
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  }
+                },
+                "required": [
+                  "song_ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Counts of songs added and skipped.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "added_count": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "skipped_count": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "added_count",
+                        "skipped_count"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/albums/{albumId}/artists": {
+      "patch": {
+        "operationId": "patchV1AdminAlbumsByAlbumIdArtists",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Replace an album's artists (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Full membership replace — every id must be an existing artist. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "albumId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "artist_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  }
+                },
+                "required": [
+                  "artist_ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The album's new artist ids.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "artist_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "artist_ids"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/albums/{albumId}/labels": {
+      "patch": {
+        "operationId": "patchV1AdminAlbumsByAlbumIdLabels",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Replace an album's labels (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Full membership replace — every id must be an existing label. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "albumId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "label_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  }
+                },
+                "required": [
+                  "label_ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The album's new label ids.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "label_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "label_ids"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
       }
     },
     "/v1/admin/curated-lists": {
@@ -12313,6 +16755,122 @@
             "$ref": "#/components/responses/RateLimited"
           }
         }
+      },
+      "post": {
+        "operationId": "postV1AdminCuratedLists",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Create a curated list (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "description": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 5000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "list_type": {
+                    "default": "public",
+                    "type": "string",
+                    "enum": [
+                      "public",
+                      "internal"
+                    ]
+                  },
+                  "show_artists": {
+                    "default": true,
+                    "type": "boolean"
+                  },
+                  "show_writers": {
+                    "default": false,
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "title"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The created list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
       }
     },
     "/v1/admin/curated-lists/{listId}": {
@@ -12474,6 +17032,794 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchV1AdminCuratedListsByListId",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Update a curated list (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "description": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 5000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "list_type": {
+                    "default": "public",
+                    "type": "string",
+                    "enum": [
+                      "public",
+                      "internal"
+                    ]
+                  },
+                  "show_artists": {
+                    "default": true,
+                    "type": "boolean"
+                  },
+                  "show_writers": {
+                    "default": false,
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "title"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/curated-lists/{listId}/status": {
+      "patch": {
+        "operationId": "patchV1AdminCuratedListsByListIdStatus",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Set a curated list's status (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "draft",
+                      "published",
+                      "archived"
+                    ]
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The list's new status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "draft",
+                            "published",
+                            "archived"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "status"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/curated-lists/order": {
+      "patch": {
+        "operationId": "patchV1AdminCuratedListsOrder",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Reorder curated lists (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ids": {
+                    "maxItems": 1000,
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "offset": {
+                    "default": 0,
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Count of lists whose position changed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "updated": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "updated"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/curated-lists/{listId}/songs": {
+      "patch": {
+        "operationId": "patchV1AdminCuratedListsByListIdSongs",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Replace a curated list's songs (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Full membership replace — only published, non-deleted songs are accepted. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "song_ids": {
+                    "maxItems": 1000,
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  }
+                },
+                "required": [
+                  "song_ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The list's new song count.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "song_count": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "song_count"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/curated-lists/{listId}/songs/append": {
+      "patch": {
+        "operationId": "patchV1AdminCuratedListsByListIdSongsAppend",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Add songs to a curated list (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Incremental add — already-present songs are skipped, archived lists are refused. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "song_ids": {
+                    "minItems": 1,
+                    "maxItems": 1000,
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  }
+                },
+                "required": [
+                  "song_ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Counts of songs added and skipped.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "added_count": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "skipped_count": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "added_count",
+                        "skipped_count"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/curated-lists/with-songs": {
+      "post": {
+        "operationId": "postV1AdminCuratedListsWithSongs",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Create a curated list with songs (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Combined create+populate — only published, non-deleted songs are accepted. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "song_ids": {
+                    "minItems": 1,
+                    "maxItems": 1000,
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  }
+                },
+                "required": [
+                  "title",
+                  "song_ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The created list and counts of songs added/skipped.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "added_count": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "skipped_count": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "added_count",
+                        "skipped_count"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/settings/{key}": {
+      "patch": {
+        "operationId": "patchV1AdminSettingsByKey",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Toggle a boolean app setting (backstage)",
+        "description": "Authenticated, super-only, write-scoped. Requires a `write`-scope backstage token minted for a super user and an `Idempotency-Key` header. `:key` must be one of: daily-digest-enabled, song-published-email-enabled, welcome-email-enabled, song-involvement-digest-enabled.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "daily-digest-enabled",
+                "song-published-email-enabled",
+                "welcome-email-enabled",
+                "song-involvement-digest-enabled"
+              ]
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "enabled"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The setting's updated value.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "key": {
+                          "type": "string",
+                          "enum": [
+                            "daily-digest-enabled",
+                            "song-published-email-enabled",
+                            "welcome-email-enabled",
+                            "song-involvement-digest-enabled"
+                          ]
+                        },
+                        "enabled": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "key",
+                        "enabled"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The token does not belong to a super user."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
