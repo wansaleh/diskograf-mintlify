@@ -322,9 +322,9 @@ Label list items contain `id`, `name`, `slug`, and `song_count`. Label detail co
 
 ### Album and curated-list data
 
-An album summary contains `id`, `title`, `artwork_url`, `song_count`, and `latest_released_at`.
+An album summary contains `id`, `title`, `album_type`, `artwork_url`, `song_count`, and `latest_released_at`.
 
-Album detail contains `id`, `title`, `artwork_url`, `released_at`, an `artists` array, and a `songs` array. Its `released_at` uses the manual album date when set, otherwise the latest release date among visible tracks. Each album artist contains `id`, `name`, `prefix_title`, and `is_group`.
+Album detail contains `id`, `title`, `album_type`, `artwork_url`, `released_at`, an `artists` array, and a `songs` array. `album_type` is `album`, `ep`, or `single`. Its `released_at` uses the manual album date when set, otherwise the latest release date among visible tracks. Each album artist contains `id`, `name`, `prefix_title`, and `is_group`.
 
 Each album track is a song card plus `position`, `date_type`, `duration_ms`, and `youtube_duration_seconds`. `duration_ms` is the manually-entered track length; `youtube_duration_seconds` is the auto-fetched YouTube length, used as a fallback when `duration_ms` is `null`.
 
