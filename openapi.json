@@ -1617,6 +1617,18 @@
                             },
                             "description": "Primary performing credits only, in credit order."
                           },
+                          "artwork_thumb_url": {
+                            "type": "string",
+                            "description": "Absolute CDN URL for the small artwork tier. Resolved server-side; never a bare storage key."
+                          },
+                          "artwork_average": {
+                            "default": null,
+                            "description": "Saved average colour of the artwork as hex, for the image placeholder. Null until first computed.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "lyrics_preview": {
                             "type": [
                               "string",
@@ -1646,6 +1658,7 @@
                           "youtube_views",
                           "youtube_views_per_day",
                           "artists",
+                          "artwork_thumb_url",
                           "lyrics_preview",
                           "lyrics_preview_has_more",
                           "source"
@@ -2154,6 +2167,31 @@
                               "null"
                             ]
                           },
+                          "artwork_colors": {
+                            "default": null,
+                            "description": "Saved colours sampled from the artwork, as hex.",
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "dominant": {
+                                    "type": "string"
+                                  },
+                                  "average": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "dominant",
+                                  "average"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
                           "released_at": {
                             "description": "Manual album release date, when available.",
                             "type": [
@@ -2271,6 +2309,31 @@
                             "type": [
                               "string",
                               "null"
+                            ]
+                          },
+                          "artwork_colors": {
+                            "default": null,
+                            "description": "Saved colours sampled from the artwork, as hex.",
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "dominant": {
+                                    "type": "string"
+                                  },
+                                  "average": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "dominant",
+                                  "average"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
                             ]
                           }
                         },
@@ -3399,6 +3462,31 @@
                           "type": [
                             "string",
                             "null"
+                          ]
+                        },
+                        "artwork_colors": {
+                          "default": null,
+                          "description": "Saved colours sampled from the artwork, as hex.",
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "dominant": {
+                                  "type": "string"
+                                },
+                                "average": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "dominant",
+                                "average"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
                           ]
                         },
                         "released_at": {
@@ -5764,6 +5852,31 @@
                           "type": [
                             "string",
                             "null"
+                          ]
+                        },
+                        "artwork_colors": {
+                          "default": null,
+                          "description": "Saved colours sampled from the artwork, as hex.",
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "dominant": {
+                                  "type": "string"
+                                },
+                                "average": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "dominant",
+                                "average"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
                           ]
                         },
                         "updated_at": {
