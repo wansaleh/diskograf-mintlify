@@ -475,6 +475,14 @@
                                 "type": "string",
                                 "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
                               },
+                              "artwork_average": {
+                                "default": null,
+                                "description": "Saved average artwork colour as hex, or null until computed.",
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
                               "artwork_source": {
                                 "anyOf": [
                                   {
@@ -980,6 +988,14 @@
                             "type": "string",
                             "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
                           },
+                          "artwork_average": {
+                            "default": null,
+                            "description": "Saved average artwork colour as hex, or null until computed.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "artwork_source": {
                             "anyOf": [
                               {
@@ -1182,6 +1198,14 @@
                           "artwork_url": {
                             "type": "string",
                             "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
+                          },
+                          "artwork_average": {
+                            "default": null,
+                            "description": "Saved average artwork colour as hex, or null until computed.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
                           },
                           "artwork_source": {
                             "anyOf": [
@@ -1399,6 +1423,19 @@
                           "artwork_url": {
                             "type": "string"
                           },
+                          "artwork_average": {
+                            "default": null,
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "youtube_video_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "youtube_views_per_day": {
                             "anyOf": [
                               {
@@ -1431,6 +1468,7 @@
                           "title",
                           "released_at",
                           "artwork_url",
+                          "youtube_video_id",
                           "youtube_views_per_day",
                           "artists"
                         ]
@@ -1502,6 +1540,17 @@
               "type": "string"
             },
             "description": "Comma-separated song IDs already shown to this visitor."
+          },
+          {
+            "name": "random_count",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 50,
+              "default": 10
+            },
+            "description": "How many random songs to return. Larger values let a client rotate a cached pool."
           }
         ],
         "responses": {
@@ -1535,6 +1584,14 @@
                           "artwork_url": {
                             "type": "string",
                             "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
+                          },
+                          "artwork_average": {
+                            "default": null,
+                            "description": "Saved average artwork colour as hex, or null until computed.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
                           },
                           "artwork_source": {
                             "anyOf": [
@@ -1620,14 +1677,6 @@
                           "artwork_thumb_url": {
                             "type": "string",
                             "description": "Absolute CDN URL for the small artwork tier. Resolved server-side; never a bare storage key."
-                          },
-                          "artwork_average": {
-                            "default": null,
-                            "description": "Saved average colour of the artwork as hex, for the image placeholder. Null until first computed.",
-                            "type": [
-                              "string",
-                              "null"
-                            ]
                           },
                           "lyrics_preview": {
                             "type": [
@@ -1773,6 +1822,31 @@
                         },
                         "artwork_url": {
                           "type": "string"
+                        },
+                        "artwork_colors": {
+                          "default": null,
+                          "description": "Saved colours sampled from the artwork, as hex.",
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "dominant": {
+                                  "type": "string"
+                                },
+                                "average": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "dominant",
+                                "average"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
                         },
                         "artwork_source": {
                           "anyOf": [
@@ -2672,6 +2746,14 @@
                                 "type": "string",
                                 "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
                               },
+                              "artwork_average": {
+                                "default": null,
+                                "description": "Saved average artwork colour as hex, or null until computed.",
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
                               "artwork_source": {
                                 "anyOf": [
                                   {
@@ -2785,6 +2867,14 @@
                                 "type": "string",
                                 "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
                               },
+                              "artwork_average": {
+                                "default": null,
+                                "description": "Saved average artwork colour as hex, or null until computed.",
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
                               "artwork_source": {
                                 "anyOf": [
                                   {
@@ -2897,6 +2987,14 @@
                               "artwork_url": {
                                 "type": "string",
                                 "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
+                              },
+                              "artwork_average": {
+                                "default": null,
+                                "description": "Saved average artwork colour as hex, or null until computed.",
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
                               },
                               "artwork_source": {
                                 "anyOf": [
@@ -3559,6 +3657,14 @@
                               "artwork_url": {
                                 "type": "string",
                                 "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
+                              },
+                              "artwork_average": {
+                                "default": null,
+                                "description": "Saved average artwork colour as hex, or null until computed.",
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
                               },
                               "artwork_source": {
                                 "anyOf": [
@@ -5023,6 +5129,14 @@
                             "type": "string",
                             "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
                           },
+                          "artwork_average": {
+                            "default": null,
+                            "description": "Saved average artwork colour as hex, or null until computed.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "artwork_source": {
                             "anyOf": [
                               {
@@ -5917,6 +6031,14 @@
                                 "type": "string",
                                 "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
                               },
+                              "artwork_average": {
+                                "default": null,
+                                "description": "Saved average artwork colour as hex, or null until computed.",
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
                               "artwork_source": {
                                 "anyOf": [
                                   {
@@ -6339,6 +6461,14 @@
                                   "type": "string",
                                   "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
                                 },
+                                "artwork_average": {
+                                  "default": null,
+                                  "description": "Saved average artwork colour as hex, or null until computed.",
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
                                 "artwork_source": {
                                   "anyOf": [
                                     {
@@ -6624,6 +6754,14 @@
                                 "type": "string",
                                 "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
                               },
+                              "artwork_average": {
+                                "default": null,
+                                "description": "Saved average artwork colour as hex, or null until computed.",
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
                               "artwork_source": {
                                 "anyOf": [
                                   {
@@ -6736,6 +6874,14 @@
                               "artwork_url": {
                                 "type": "string",
                                 "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
+                              },
+                              "artwork_average": {
+                                "default": null,
+                                "description": "Saved average artwork colour as hex, or null until computed.",
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
                               },
                               "artwork_source": {
                                 "anyOf": [
@@ -7151,6 +7297,14 @@
                             "type": "string",
                             "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
                           },
+                          "artwork_average": {
+                            "default": null,
+                            "description": "Saved average artwork colour as hex, or null until computed.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "artwork_source": {
                             "anyOf": [
                               {
@@ -7503,6 +7657,19 @@
                                 "artwork_url": {
                                   "type": "string"
                                 },
+                                "artwork_average": {
+                                  "default": null,
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "youtube_video_id": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
                                 "youtube_views_per_day": {
                                   "anyOf": [
                                     {
@@ -7535,6 +7702,7 @@
                                 "title",
                                 "released_at",
                                 "artwork_url",
+                                "youtube_video_id",
                                 "youtube_views_per_day",
                                 "artists"
                               ]
@@ -7785,6 +7953,14 @@
                           "artwork_url": {
                             "type": "string",
                             "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
+                          },
+                          "artwork_average": {
+                            "default": null,
+                            "description": "Saved average artwork colour as hex, or null until computed.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
                           },
                           "artwork_source": {
                             "anyOf": [
@@ -8438,6 +8614,14 @@
                                     "type": "string",
                                     "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
                                   },
+                                  "artwork_average": {
+                                    "default": null,
+                                    "description": "Saved average artwork colour as hex, or null until computed.",
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
                                   "artwork_source": {
                                     "anyOf": [
                                       {
@@ -8660,6 +8844,14 @@
                           "artwork_url": {
                             "type": "string",
                             "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
+                          },
+                          "artwork_average": {
+                            "default": null,
+                            "description": "Saved average artwork colour as hex, or null until computed.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
                           },
                           "artwork_source": {
                             "anyOf": [
@@ -9296,6 +9488,14 @@
                           "artwork_url": {
                             "type": "string",
                             "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
+                          },
+                          "artwork_average": {
+                            "default": null,
+                            "description": "Saved average artwork colour as hex, or null until computed.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
                           },
                           "artwork_source": {
                             "anyOf": [
