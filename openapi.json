@@ -1431,6 +1431,7 @@
                             ]
                           },
                           "youtube_video_id": {
+                            "default": null,
                             "type": [
                               "string",
                               "null"
@@ -1468,7 +1469,6 @@
                           "title",
                           "released_at",
                           "artwork_url",
-                          "youtube_video_id",
                           "youtube_views_per_day",
                           "artists"
                         ]
@@ -7665,6 +7665,7 @@
                                   ]
                                 },
                                 "youtube_video_id": {
+                                  "default": null,
                                   "type": [
                                     "string",
                                     "null"
@@ -7702,7 +7703,6 @@
                                 "title",
                                 "released_at",
                                 "artwork_url",
-                                "youtube_video_id",
                                 "youtube_views_per_day",
                                 "artists"
                               ]
