@@ -5841,6 +5841,14 @@
                           "title": {
                             "type": "string"
                           },
+                          "description": {
+                            "default": null,
+                            "description": "Short public description for the curated list.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "artwork_url": {
                             "description": "Absolute CDN URL for the list artwork.",
                             "type": [
@@ -9763,6 +9771,9 @@
           },
           "503": {
             "description": "YouTube integration is not configured."
+          },
+          "504": {
+            "description": "YouTube did not respond in time."
           }
         }
       }
@@ -12370,6 +12381,12 @@
                               "null"
                             ]
                           },
+                          "updated_by_username": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "username": {
                             "type": [
                               "string",
@@ -12455,6 +12472,7 @@
                           "created_at",
                           "updated_at",
                           "added_by_username",
+                          "updated_by_username",
                           "username",
                           "avatar_data",
                           "user_image",
