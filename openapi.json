@@ -4149,6 +4149,187 @@
         }
       }
     },
+    "/v1/artists/top": {
+      "get": {
+        "operationId": "getV1ArtistsTop",
+        "tags": [
+          "Artists"
+        ],
+        "summary": "List top artists by credit role",
+        "description": "Top singers, composers, lyricists, producers, and mixers. Artists rank by distinct published song credits in each role. Genre and year filters apply to the ranked credits.",
+        "parameters": [
+          {
+            "name": "genre",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Top artist role charts and available filters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "charts": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "role": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "slug": {
+                                    "type": "string"
+                                  },
+                                  "title": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "slug",
+                                  "title"
+                                ]
+                              },
+                              "artists": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "prefix_title": {
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
+                                    },
+                                    "is_group": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "role_songs": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "avatar_url": {
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
+                                    },
+                                    "username": {
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
+                                    },
+                                    "country": {
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
+                                    },
+                                    "is_deceased": {
+                                      "type": "boolean"
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name",
+                                    "prefix_title",
+                                    "is_group",
+                                    "role_songs",
+                                    "avatar_url",
+                                    "username",
+                                    "country",
+                                    "is_deceased"
+                                  ]
+                                }
+                              }
+                            },
+                            "required": [
+                              "role",
+                              "artists"
+                            ]
+                          }
+                        },
+                        "genres": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "slug": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "slug",
+                              "title"
+                            ]
+                          }
+                        },
+                        "years": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        }
+                      },
+                      "required": [
+                        "charts",
+                        "genres",
+                        "years"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
     "/v1/artists/namesake-hints": {
       "get": {
         "operationId": "getV1ArtistsNamesakeHints",
@@ -12534,203 +12715,6 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          }
-        }
-      }
-    },
-    "/v1/admin/artists/top": {
-      "get": {
-        "operationId": "getV1AdminArtistsTop",
-        "tags": [
-          "Backstage"
-        ],
-        "summary": "List top artists by credit role (backstage)",
-        "description": "Authenticated, super-only. Top singers, composers, lyricists, producers, and mixers. Artists rank by distinct published song credits in each role. Genre and year filters apply to the ranked credits.",
-        "security": [
-          {
-            "backstageBearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "genre",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            },
-            "description": "Genre slug."
-          },
-          {
-            "name": "year",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "Release year."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Top artist role charts and available filters.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "charts": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "role": {
-                                "type": "object",
-                                "properties": {
-                                  "id": {
-                                    "type": "integer",
-                                    "minimum": -9007199254740991,
-                                    "maximum": 9007199254740991
-                                  },
-                                  "slug": {
-                                    "type": "string"
-                                  },
-                                  "title": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "id",
-                                  "slug",
-                                  "title"
-                                ]
-                              },
-                              "artists": {
-                                "type": "array",
-                                "items": {
-                                  "type": "object",
-                                  "properties": {
-                                    "id": {
-                                      "type": "integer",
-                                      "minimum": -9007199254740991,
-                                      "maximum": 9007199254740991
-                                    },
-                                    "name": {
-                                      "type": "string"
-                                    },
-                                    "prefix_title": {
-                                      "type": [
-                                        "string",
-                                        "null"
-                                      ]
-                                    },
-                                    "is_group": {
-                                      "type": [
-                                        "boolean",
-                                        "null"
-                                      ]
-                                    },
-                                    "role_songs": {
-                                      "type": "integer",
-                                      "minimum": -9007199254740991,
-                                      "maximum": 9007199254740991
-                                    },
-                                    "avatar_url": {
-                                      "type": [
-                                        "string",
-                                        "null"
-                                      ]
-                                    },
-                                    "username": {
-                                      "type": [
-                                        "string",
-                                        "null"
-                                      ]
-                                    },
-                                    "country": {
-                                      "type": [
-                                        "string",
-                                        "null"
-                                      ]
-                                    },
-                                    "is_deceased": {
-                                      "type": "boolean"
-                                    }
-                                  },
-                                  "required": [
-                                    "id",
-                                    "name",
-                                    "prefix_title",
-                                    "is_group",
-                                    "role_songs",
-                                    "avatar_url",
-                                    "username",
-                                    "country",
-                                    "is_deceased"
-                                  ]
-                                }
-                              }
-                            },
-                            "required": [
-                              "role",
-                              "artists"
-                            ]
-                          }
-                        },
-                        "genres": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "slug": {
-                                "type": "string"
-                              },
-                              "title": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "slug",
-                              "title"
-                            ]
-                          }
-                        },
-                        "years": {
-                          "type": "array",
-                          "items": {
-                            "type": "integer",
-                            "minimum": -9007199254740991,
-                            "maximum": 9007199254740991
-                          }
-                        }
-                      },
-                      "required": [
-                        "charts",
-                        "genres",
-                        "years"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "description": "The token does not belong to a super user."
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
