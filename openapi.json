@@ -873,6 +873,19 @@
             "description": "Role slug. Repeat the parameter or comma-separate for several."
           },
           {
+            "name": "gender",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "undisclosed"
+              ]
+            },
+            "description": "Match any primary credited individual artist. Missing gender counts as undisclosed; groups never match. Legacy m/f aliases are accepted."
+          },
+          {
             "name": "artist_id",
             "in": "query",
             "schema": {
@@ -1991,6 +2004,18 @@
                                 }
                               ]
                             },
+                            "likes": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
                             "last_fetched": {
                               "type": [
                                 "string",
@@ -2002,6 +2027,7 @@
                             "duration_seconds",
                             "views",
                             "views_per_day",
+                            "likes",
                             "last_fetched"
                           ]
                         },
@@ -2531,6 +2557,18 @@
                                 }
                               ]
                             },
+                            "likes": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
                             "duration_seconds": {
                               "type": [
                                 "number",
@@ -2548,6 +2586,7 @@
                             "video_id",
                             "views",
                             "views_per_day",
+                            "likes",
                             "duration_seconds",
                             "last_fetched"
                           ]
@@ -3914,6 +3953,19 @@
             "description": "True for groups only, false for individuals only."
           },
           {
+            "name": "gender",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "undisclosed"
+              ]
+            },
+            "description": "Restrict to individuals with this gender. Missing gender counts as undisclosed. Groups never match. Legacy m/f aliases are accepted."
+          },
+          {
             "name": "sort",
             "in": "query",
             "schema": {
@@ -5241,6 +5293,19 @@
             }
           },
           {
+            "name": "gender",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "undisclosed"
+              ]
+            },
+            "description": "Match any primary credited individual artist. Missing gender counts as undisclosed; groups never match. Legacy m/f aliases are accepted."
+          },
+          {
             "name": "sort",
             "in": "query",
             "schema": {
@@ -5948,7 +6013,7 @@
           "Curated Lists"
         ],
         "summary": "List curated lists",
-        "description": "Published public curated lists in curated order, with song counts and artwork. Returned whole by default; pass `limit` to page through them instead, optionally with `keyword` and an order. `meta.total` is then the filtered total, not the page size.",
+        "description": "Published public curated lists in curated order, with song counts and artwork. Filter by one custom tag. Returned whole by default; pass `limit` to page through them instead, optionally with `keyword`, `tag`, and an order. `meta.total` is then the filtered total, not the page size.",
         "parameters": [
           {
             "name": "keyword",
@@ -5957,6 +6022,14 @@
               "type": "string"
             },
             "description": "Fuzzy search across the list title. Requires `limit`."
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exact custom tag filter. Case-insensitive."
           },
           {
             "name": "limit",
@@ -7417,6 +7490,19 @@
             }
           },
           {
+            "name": "gender",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "undisclosed"
+              ]
+            },
+            "description": "Match any primary credited individual artist. Missing gender counts as undisclosed; groups never match. Legacy m/f aliases are accepted."
+          },
+          {
             "name": "sort",
             "in": "query",
             "schema": {
@@ -8072,6 +8158,19 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "gender",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "undisclosed"
+              ]
+            },
+            "description": "Match any primary credited individual artist. Missing gender counts as undisclosed; groups never match. Legacy m/f aliases are accepted."
           },
           {
             "name": "sort",
@@ -9609,6 +9708,19 @@
             }
           },
           {
+            "name": "gender",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "undisclosed"
+              ]
+            },
+            "description": "Match any primary credited individual artist. Missing gender counts as undisclosed; groups never match. Legacy m/f aliases are accepted."
+          },
+          {
             "name": "sort",
             "in": "query",
             "schema": {
@@ -9994,6 +10106,19 @@
             "description": "Restrict to unpublished or published songs. Omit for both."
           },
           {
+            "name": "gender",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "undisclosed"
+              ]
+            },
+            "description": "Match any primary credited individual artist. Missing gender counts as undisclosed; groups never match. Legacy m/f aliases are accepted."
+          },
+          {
             "name": "quality",
             "in": "query",
             "schema": {
@@ -10006,6 +10131,26 @@
               ]
             },
             "description": "Quality filter. Repeat the parameter for several: without_artwork, without_label, without_streaming_links, youtube_topic."
+          },
+          {
+            "name": "video_class",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "official_mv",
+                "official_lyric",
+                "official_visualizer",
+                "official_audio",
+                "live",
+                "fan_video",
+                "cover",
+                "karaoke",
+                "other",
+                "unclassified"
+              ]
+            },
+            "description": "Video class filter. Repeat the parameter for several. Matches songs whose current YouTube video has any of the classes. `unclassified` matches songs with a YouTube video and no class yet."
           },
           {
             "name": "order_column",
@@ -10166,6 +10311,27 @@
                                       "string",
                                       "null"
                                     ]
+                                  },
+                                  "videoClass": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "official_mv",
+                                          "official_lyric",
+                                          "official_visualizer",
+                                          "official_audio",
+                                          "live",
+                                          "fan_video",
+                                          "cover",
+                                          "karaoke",
+                                          "other"
+                                        ]
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -10175,7 +10341,8 @@
                                   "artworkThumb",
                                   "artworkCustom",
                                   "spotify",
-                                  "applemusic"
+                                  "applemusic",
+                                  "videoClass"
                                 ],
                                 "additionalProperties": false
                               },
@@ -12353,6 +12520,19 @@
             "description": "Restrict to solo artists or groups."
           },
           {
+            "name": "gender",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "undisclosed"
+              ]
+            },
+            "description": "Restrict to individuals with this gender. Missing gender counts as undisclosed. Groups never match. Legacy m/f aliases are accepted."
+          },
+          {
             "name": "registered",
             "in": "query",
             "schema": {
@@ -12608,6 +12788,18 @@
                           "is_deceased": {
                             "type": "boolean"
                           },
+                          "birth_date": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "death_date": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "namesake_disambiguator": {
                             "type": [
                               "string",
@@ -12659,6 +12851,8 @@
                           "user_image",
                           "aliases",
                           "is_deceased",
+                          "birth_date",
+                          "death_date",
                           "namesake_disambiguator",
                           "namesake_role",
                           "namesake_song",
@@ -12809,6 +13003,14 @@
                                 "null"
                               ]
                             },
+                            "gender": {
+                              "type": "string",
+                              "enum": [
+                                "male",
+                                "female",
+                                "undisclosed"
+                              ]
+                            },
                             "b2_avatar": {
                               "type": [
                                 "string",
@@ -12947,6 +13149,7 @@
                           },
                           "required": [
                             "avatar",
+                            "gender",
                             "b2_avatar",
                             "country",
                             "place",
@@ -13116,6 +13319,15 @@
                   },
                   "is_group": {
                     "type": "boolean"
+                  },
+                  "gender": {
+                    "description": "Gender for an individual artist. The old m and f values remain accepted as aliases.",
+                    "type": "string",
+                    "enum": [
+                      "male",
+                      "female",
+                      "undisclosed"
+                    ]
                   },
                   "aliases": {
                     "anyOf": [
@@ -18003,6 +18215,12 @@
                               "null"
                             ]
                           },
+                          "tags": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
                           "artwork_url": {
                             "type": [
                               "string",
@@ -18057,6 +18275,7 @@
                           "id",
                           "title",
                           "description",
+                          "tags",
                           "artwork_url",
                           "list_type",
                           "status",
@@ -18168,6 +18387,16 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "tags": {
+                    "default": [],
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 50
+                    }
                   },
                   "list_type": {
                     "default": "public",
@@ -18289,6 +18518,12 @@
                             "null"
                           ]
                         },
+                        "tags": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
                         "artwork_song_id": {
                           "anyOf": [
                             {
@@ -18376,6 +18611,7 @@
                         "id",
                         "title",
                         "description",
+                        "tags",
                         "artwork_song_id",
                         "list_type",
                         "status",
@@ -18458,6 +18694,16 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "tags": {
+                    "default": [],
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 50
+                    }
                   },
                   "list_type": {
                     "default": "public",
