@@ -1462,6 +1462,53 @@
                               }
                             ]
                           },
+                          "youtube_views": {
+                            "default": null,
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "youtube_likes": {
+                            "default": null,
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "duration_seconds": {
+                            "default": null,
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "spotify_popularity": {
+                            "default": null,
+                            "description": "Spotify popularity, 0-100.",
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
                           "artists": {
                             "type": "array",
                             "items": {
@@ -1475,6 +1522,36 @@
                                 "name"
                               ]
                             }
+                          },
+                          "rank_movement": {
+                            "default": null,
+                            "description": "Movement since the previous daily snapshot of the top 30. Null when the chart has no history: genre, year, and label charts, ranks below 30, or no earlier snapshot.",
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "previous_rank": {
+                                    "anyOf": [
+                                      {
+                                        "type": "integer",
+                                        "minimum": -9007199254740991,
+                                        "maximum": 9007199254740991
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ],
+                                    "description": "Rank in the previous daily snapshot. Null means the song is new to the chart."
+                                  }
+                                },
+                                "required": [
+                                  "previous_rank"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           }
                         },
                         "required": [
@@ -1853,8 +1930,7 @@
                               "required": [
                                 "dominant",
                                 "average"
-                              ],
-                              "additionalProperties": false
+                              ]
                             },
                             {
                               "type": "null"
@@ -2284,8 +2360,7 @@
                                 "required": [
                                   "dominant",
                                   "average"
-                                ],
-                                "additionalProperties": false
+                                ]
                               },
                               {
                                 "type": "null"
@@ -2311,8 +2386,7 @@
                           "artwork_url",
                           "released_at",
                           "position"
-                        ],
-                        "additionalProperties": false
+                        ]
                       }
                     },
                     "meta": {
@@ -2428,8 +2502,7 @@
                                 "required": [
                                   "dominant",
                                   "average"
-                                ],
-                                "additionalProperties": false
+                                ]
                               },
                               {
                                 "type": "null"
@@ -2441,8 +2514,7 @@
                           "id",
                           "title",
                           "artwork_url"
-                        ],
-                        "additionalProperties": false
+                        ]
                       }
                     },
                     "meta": {
@@ -3480,8 +3552,7 @@
                                 "prefix_title",
                                 "is_group",
                                 "avatar_url"
-                              ],
-                              "additionalProperties": false
+                              ]
                             },
                             "description": "Explicit album artists, or primary artists resolved from visible tracks."
                           }
@@ -3494,8 +3565,7 @@
                           "song_count",
                           "latest_released_at",
                           "artists"
-                        ],
-                        "additionalProperties": false
+                        ]
                       }
                     },
                     "meta": {
@@ -3618,8 +3688,7 @@
                               "required": [
                                 "dominant",
                                 "average"
-                              ],
-                              "additionalProperties": false
+                              ]
                             },
                             {
                               "type": "null"
@@ -3669,8 +3738,7 @@
                               "prefix_title",
                               "is_group",
                               "avatar_url"
-                            ],
-                            "additionalProperties": false
+                            ]
                           }
                         },
                         "songs": {
@@ -3865,8 +3933,7 @@
                               "spotify_url",
                               "apple_music_url",
                               "position"
-                            ],
-                            "additionalProperties": false
+                            ]
                           }
                         }
                       },
@@ -3878,8 +3945,7 @@
                         "released_at",
                         "artists",
                         "songs"
-                      ],
-                      "additionalProperties": false
+                      ]
                     }
                   },
                   "required": [
@@ -4781,8 +4847,7 @@
                           "id",
                           "name",
                           "role"
-                        ],
-                        "additionalProperties": false
+                        ]
                       }
                     },
                     "meta": {
@@ -5894,8 +5959,7 @@
                                 "id",
                                 "popularity",
                                 "duration_ms"
-                              ],
-                              "additionalProperties": false
+                              ]
                             },
                             {
                               "type": "object",
@@ -5934,8 +5998,7 @@
                                 "track_id",
                                 "collection_id",
                                 "track_time_millis"
-                              ],
-                              "additionalProperties": false
+                              ]
                             }
                           ]
                         },
@@ -6110,7 +6173,22 @@
                               "null"
                             ]
                           },
+                          "content_type": {
+                            "default": "songs",
+                            "description": "Whether the list holds songs or albums.",
+                            "type": "string",
+                            "enum": [
+                              "songs",
+                              "albums"
+                            ]
+                          },
                           "song_count": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "album_count": {
+                            "default": 0,
                             "type": "integer",
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
@@ -6126,8 +6204,7 @@
                           "artwork_url",
                           "song_count",
                           "updated_at"
-                        ],
-                        "additionalProperties": false
+                        ]
                       }
                     },
                     "meta": {
@@ -6247,8 +6324,7 @@
                               "required": [
                                 "dominant",
                                 "average"
-                              ],
-                              "additionalProperties": false
+                              ]
                             },
                             {
                               "type": "null"
@@ -6268,6 +6344,15 @@
                           "default": false,
                           "description": "Whether the tracklist metadata row shows writer (composer/lyricist) credits.",
                           "type": "boolean"
+                        },
+                        "content_type": {
+                          "default": "songs",
+                          "description": "Whether the list holds songs or albums. Only the matching array has rows.",
+                          "type": "string",
+                          "enum": [
+                            "songs",
+                            "albums"
+                          ]
                         },
                         "songs": {
                           "type": "array",
@@ -6476,8 +6561,103 @@
                               "youtube_duration_seconds",
                               "spotify_url",
                               "apple_music_url"
-                            ],
-                            "additionalProperties": false
+                            ]
+                          }
+                        },
+                        "albums": {
+                          "default": [],
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "album_type": {
+                                "type": "string",
+                                "enum": [
+                                  "album",
+                                  "ep",
+                                  "single"
+                                ],
+                                "description": "Album release type."
+                              },
+                              "artwork_url": {
+                                "description": "Absolute CDN URL for the album artwork.",
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "song_count": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "latest_released_at": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "artists": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "prefix_title": {
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
+                                    },
+                                    "is_group": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "avatar_url": {
+                                      "description": "Resolved public CDN URL for the artist avatar.",
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name",
+                                    "prefix_title",
+                                    "is_group",
+                                    "avatar_url"
+                                  ]
+                                },
+                                "description": "Explicit album artists, or primary artists resolved from visible tracks."
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "title",
+                              "album_type",
+                              "artwork_url",
+                              "song_count",
+                              "latest_released_at",
+                              "artists"
+                            ]
                           }
                         }
                       },
@@ -6488,8 +6668,7 @@
                         "artwork_url",
                         "updated_at",
                         "songs"
-                      ],
-                      "additionalProperties": false
+                      ]
                     }
                   },
                   "required": [
@@ -6549,8 +6728,7 @@
                         "required": [
                           "id",
                           "artwork_url"
-                        ],
-                        "additionalProperties": false
+                        ]
                       }
                     },
                     "meta": {
@@ -7958,6 +8136,53 @@
                                     }
                                   ]
                                 },
+                                "youtube_views": {
+                                  "default": null,
+                                  "anyOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "youtube_likes": {
+                                  "default": null,
+                                  "anyOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "duration_seconds": {
+                                  "default": null,
+                                  "type": [
+                                    "number",
+                                    "null"
+                                  ]
+                                },
+                                "spotify_popularity": {
+                                  "default": null,
+                                  "description": "Spotify popularity, 0-100.",
+                                  "anyOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
                                 "artists": {
                                   "type": "array",
                                   "items": {
@@ -7971,6 +8196,36 @@
                                       "name"
                                     ]
                                   }
+                                },
+                                "rank_movement": {
+                                  "default": null,
+                                  "description": "Movement since the previous daily snapshot of the top 30. Null when the chart has no history: genre, year, and label charts, ranks below 30, or no earlier snapshot.",
+                                  "anyOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "previous_rank": {
+                                          "anyOf": [
+                                            {
+                                              "type": "integer",
+                                              "minimum": -9007199254740991,
+                                              "maximum": 9007199254740991
+                                            },
+                                            {
+                                              "type": "null"
+                                            }
+                                          ],
+                                          "description": "Rank in the previous daily snapshot. Null means the song is new to the chart."
+                                        }
+                                      },
+                                      "required": [
+                                        "previous_rank"
+                                      ]
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "required": [
@@ -12672,6 +12927,21 @@
                               "null"
                             ]
                           },
+                          "gender": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "male",
+                                  "female",
+                                  "undisclosed"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
                           "total_songs": {
                             "anyOf": [
                               {
@@ -12837,6 +13107,7 @@
                           "country",
                           "prefix_title",
                           "is_group",
+                          "gender",
                           "total_songs",
                           "role_songs",
                           "has_credits",
@@ -15859,7 +16130,8 @@
               "enum": [
                 "newest",
                 "oldest",
-                "last_seen_at"
+                "last_seen_at",
+                "name"
               ],
               "default": "newest"
             },
@@ -16510,6 +16782,7 @@
                 "added",
                 "artist",
                 "released",
+                "songs",
                 "title",
                 "updated"
               ],
@@ -16626,6 +16899,26 @@
                                 "prefix_title"
                               ]
                             }
+                          },
+                          "labels": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "name"
+                              ]
+                            }
                           }
                         },
                         "required": [
@@ -16640,7 +16933,8 @@
                           "added_by_username",
                           "updated_by_username",
                           "song_count",
-                          "artists"
+                          "artists",
+                          "labels"
                         ]
                       }
                     },
@@ -18265,7 +18559,19 @@
                               "null"
                             ]
                           },
+                          "content_type": {
+                            "type": "string",
+                            "enum": [
+                              "songs",
+                              "albums"
+                            ]
+                          },
                           "song_count": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "album_count": {
                             "type": "integer",
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
@@ -18284,7 +18590,9 @@
                           "updated_at",
                           "added_by_username",
                           "updated_by_username",
-                          "song_count"
+                          "content_type",
+                          "song_count",
+                          "album_count"
                         ]
                       }
                     },
@@ -18413,6 +18721,14 @@
                   "show_writers": {
                     "default": false,
                     "type": "boolean"
+                  },
+                  "content_type": {
+                    "default": "songs",
+                    "type": "string",
+                    "enum": [
+                      "songs",
+                      "albums"
+                    ]
                   }
                 },
                 "required": [
@@ -18536,6 +18852,25 @@
                             }
                           ]
                         },
+                        "artwork_album_id": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "content_type": {
+                          "type": "string",
+                          "enum": [
+                            "songs",
+                            "albums"
+                          ]
+                        },
                         "list_type": {
                           "type": "string",
                           "enum": [
@@ -18605,6 +18940,70 @@
                               "artists"
                             ]
                           }
+                        },
+                        "albums": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "album_type": {
+                                "type": "string",
+                                "enum": [
+                                  "album",
+                                  "ep",
+                                  "single"
+                                ]
+                              },
+                              "artwork_url": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "latest_released_at": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "artists": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name"
+                                  ]
+                                }
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "title",
+                              "album_type",
+                              "artwork_url",
+                              "latest_released_at",
+                              "artists"
+                            ]
+                          }
                         }
                       },
                       "required": [
@@ -18613,11 +19012,14 @@
                         "description",
                         "tags",
                         "artwork_song_id",
+                        "artwork_album_id",
+                        "content_type",
                         "list_type",
                         "status",
                         "show_artists",
                         "show_writers",
-                        "songs"
+                        "songs",
+                        "albums"
                       ]
                     }
                   },
@@ -18720,6 +19122,14 @@
                   "show_writers": {
                     "default": false,
                     "type": "boolean"
+                  },
+                  "content_type": {
+                    "default": "songs",
+                    "type": "string",
+                    "enum": [
+                      "songs",
+                      "albums"
+                    ]
                   }
                 },
                 "required": [
@@ -19067,6 +19477,114 @@
                       "required": [
                         "id",
                         "song_count"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/curated-lists/{listId}/albums": {
+      "patch": {
+        "operationId": "patchV1AdminCuratedListsByListIdAlbums",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Replace a curated list's albums (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Full membership replace for lists whose content type is `albums` — only published, non-deleted albums are accepted. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "album_ids": {
+                    "maxItems": 1000,
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  }
+                },
+                "required": [
+                  "album_ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The list's new album count.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "album_count": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "album_count"
                       ]
                     }
                   },
