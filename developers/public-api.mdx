@@ -135,6 +135,7 @@ The supported ordering fields are:
 | `GET /v1/songs/{songId}` | Returns one published song and its full credits, genres, labels, and metrics. | `songId` is a positive integer. |
 | `GET /v1/songs/{songId}/similar` | Returns related songs grouped into `by_artist` and `by_others`. Matches can use shared genres, performing artists, or writing credits. | `songId` is a positive integer. |
 | `GET /v1/songs/{songId}/contributors` | Returns the public contributor timeline for a song. | `songId` is a positive integer. |
+| `GET /v1/songs/{songId}/provider-stats` | Returns the stored YouTube, Spotify, and Apple Music stats for a song. The API never calls a provider. | `songId` is a positive integer. |
 
 For `/v1/songs`, `q` searches song titles and credited artists. `artist_id` and `label_id` accept positive integer IDs. Song list responses contain song cards; see [Song data](#song-data).
 
@@ -295,6 +296,41 @@ Song detail also includes `notes`, `lyrics`, and `love_count`. The `media` objec
 ```
 
 The public user shape inside this response is `{ "username", "name", "avatar_url" }`. The `contributions` array contains the action name, timestamp, and public user for each event. This is a timeline, not a full historical snapshot of every version of a song.
+
+#### Song provider stats
+
+`GET /v1/songs/{songId}/provider-stats` returns the last stored provider snapshots:
+
+```json
+{
+  "data": {
+    "youtube": {
+      "video_id": "ZYh2sHzde7A",
+      "views": 63173,
+      "views_per_day": 99463,
+      "views_per_day_current": 76956,
+      "video_published_at": "2026-09-25T13:00:11Z",
+      "likes": 5627,
+      "duration_seconds": 199,
+      "last_fetched": "2026-09-26T04:14:47.899Z"
+    },
+    "spotify": {
+      "track_id": "4xvs2J7oe4yB6PwAOd5wCj",
+      "popularity": 43,
+      "last_fetched": "2026-09-26T01:14:33.867Z"
+    },
+    "apple_music": {
+      "track_id": "6809348393",
+      "last_fetched": "2026-09-26T01:17:24.402Z"
+    }
+  }
+}
+```
+
+- `views_per_day` is the lifetime average: total views divided by the days since the video was published.
+- `views_per_day_current` is the rate between the last two fetches. It is `null` until the video has two fetches, and `0` when views did not grow.
+- `video_published_at` is the publish time that YouTube reports. It can differ from the song's `released_at`.
+- Any field can be `null` when the provider has no value. Compare `last_fetched` to decide how fresh a snapshot is.
 
 ### Artist data
 
