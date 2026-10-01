@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Diskograf API",
-    "description": "A public, read-only REST API over the Diskograf catalogue of Malaysian music.\n\nPublic endpoints require no authentication and expose only published\ncatalogue rows. Requests are rate limited to 240 per 60 seconds per IP address.\n\nThe `/v1/admin` endpoints are the exception: authenticated with a short-lived\nbearer token minted by diskograf.com for Backstage staff, rate limited per\nprincipal, and — because they expose unpublished rows — never cached.\n\nEvery successful response is wrapped in an envelope. List endpoints return\n`{ \"data\": [...], \"meta\": { \"total\", \"limit\", \"offset\", \"next_cursor\" } }`; detail endpoints\nreturn `{ \"data\": {...} }`. Errors return `{ \"error\": { \"code\", \"message\" } }`.",
+    "description": "A public, read-only REST API over the Diskograf catalogue of Malaysian music.\n\nPublic endpoints require no authentication and expose only published\ncatalogue rows. Requests are rate limited to 360 per 60 seconds per IP address.\n\nThe `/v1/admin` endpoints are the exception: authenticated with a short-lived\nbearer token minted by diskograf.com for Backstage staff. They bypass API\nrate limits and are never cached because they expose unpublished rows.\n\nEvery successful response is wrapped in an envelope. List endpoints return\n`{ \"data\": [...], \"meta\": { \"total\", \"limit\", \"offset\", \"next_cursor\" } }`; detail endpoints\nreturn `{ \"data\": {...} }`. Errors return `{ \"error\": { \"code\", \"message\" } }`.",
     "version": "1.0.0"
   },
   "servers": [
@@ -1820,6 +1820,170 @@
                               "name"
                             ]
                           }
+                        },
+                        "version_of": {
+                          "default": [],
+                          "description": "Songs this song is a version of.",
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "remake",
+                                  "cover",
+                                  "live",
+                                  "demo",
+                                  "radio_edit",
+                                  "remaster",
+                                  "remix",
+                                  "acoustic",
+                                  "instrumental",
+                                  "other"
+                                ]
+                              },
+                              "song": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "title": {
+                                    "type": "string"
+                                  },
+                                  "slug": {
+                                    "type": "string",
+                                    "description": "URL-safe form of the title. Not unique — pair it with the id."
+                                  },
+                                  "released_at": {
+                                    "type": "string"
+                                  },
+                                  "artwork_url": {
+                                    "type": "string",
+                                    "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
+                                  },
+                                  "artists": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "id": {
+                                          "type": "integer",
+                                          "minimum": -9007199254740991,
+                                          "maximum": 9007199254740991
+                                        },
+                                        "name": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id",
+                                        "name"
+                                      ]
+                                    },
+                                    "description": "Primary performing credits only, in credit order."
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "title",
+                                  "slug",
+                                  "released_at",
+                                  "artwork_url",
+                                  "artists"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "song"
+                            ]
+                          }
+                        },
+                        "versions": {
+                          "default": [],
+                          "description": "Songs that are versions of this song.",
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "remake",
+                                  "cover",
+                                  "live",
+                                  "demo",
+                                  "radio_edit",
+                                  "remaster",
+                                  "remix",
+                                  "acoustic",
+                                  "instrumental",
+                                  "other"
+                                ]
+                              },
+                              "song": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "title": {
+                                    "type": "string"
+                                  },
+                                  "slug": {
+                                    "type": "string",
+                                    "description": "URL-safe form of the title. Not unique — pair it with the id."
+                                  },
+                                  "released_at": {
+                                    "type": "string"
+                                  },
+                                  "artwork_url": {
+                                    "type": "string",
+                                    "description": "Absolute CDN URL. Resolved server-side; never a bare storage key."
+                                  },
+                                  "artists": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "id": {
+                                          "type": "integer",
+                                          "minimum": -9007199254740991,
+                                          "maximum": 9007199254740991
+                                        },
+                                        "name": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id",
+                                        "name"
+                                      ]
+                                    },
+                                    "description": "Primary performing credits only, in credit order."
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "title",
+                                  "slug",
+                                  "released_at",
+                                  "artwork_url",
+                                  "artists"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "song"
+                            ]
+                          }
                         }
                       },
                       "required": [
@@ -3617,9 +3781,15 @@
             "name": "sort",
             "in": "query",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "relevance",
+                "name",
+                "total_songs"
+              ],
+              "default": "relevance"
             },
-            "description": "Sort column."
+            "description": "Sort column. `relevance` ranks search matches first and falls back to total_songs without `q`. Other columns ignore search relevance."
           },
           {
             "name": "order",
@@ -7796,7 +7966,7 @@
           "Songs"
         ],
         "summary": "List top songs for a chart period",
-        "description": "Published songs ranked by chart score for the selected current, yearly, or all-time period. Yearly charts accept an optional year. An optional genre limits the chart.",
+        "description": "Published songs ranked by chart score for the selected current, yearly, or all-time period. Yearly charts accept an optional year. An optional genre limits the chart. Unfiltered requests for up to 30 songs return the daily chart frozen at 00:00 MYT, including its counts, with rank movement against the previous daily chart. Other requests are ranked live and carry no movement.",
         "parameters": [
           {
             "name": "period",
@@ -10422,6 +10592,14 @@
             "description": "Match any primary credited individual artist. Missing gender counts as undisclosed; groups never match. Legacy m/f aliases are accepted."
           },
           {
+            "name": "genre",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Match songs with any selected genre slug. Repeat the parameter for several."
+          },
+          {
             "name": "quality",
             "in": "query",
             "schema": {
@@ -10654,6 +10832,55 @@
                               }
                             ]
                           },
+                          "versions": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "original",
+                                    "remake",
+                                    "cover",
+                                    "live",
+                                    "demo",
+                                    "radio_edit",
+                                    "remaster",
+                                    "remix",
+                                    "acoustic",
+                                    "instrumental",
+                                    "other"
+                                  ]
+                                },
+                                "song": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "title": {
+                                      "type": "string"
+                                    },
+                                    "artwork_url": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "title",
+                                    "artwork_url"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "song"
+                              ]
+                            }
+                          },
                           "has_lyrics": {
                             "type": "boolean"
                           },
@@ -10757,11 +10984,18 @@
                                 },
                                 "name": {
                                   "type": "string"
+                                },
+                                "short_name": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
                                 }
                               },
                               "required": [
                                 "id",
-                                "name"
+                                "name",
+                                "short_name"
                               ]
                             }
                           },
@@ -10793,6 +11027,7 @@
                           "created_at",
                           "published_at",
                           "data",
+                          "versions",
                           "has_lyrics",
                           "has_notes",
                           "total_edits",
@@ -11316,138 +11551,6 @@
                       },
                       "required": [
                         "date"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "description": "A request with this Idempotency-Key is already in progress."
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          }
-        }
-      }
-    },
-    "/v1/admin/songs/{songId}/links": {
-      "patch": {
-        "operationId": "patchV1AdminSongsBySongIdLinks",
-        "tags": [
-          "Backstage"
-        ],
-        "summary": "Update a song's external links (backstage)",
-        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header. A changed YouTube ID always fetches fresh metadata.",
-        "security": [
-          {
-            "backstageBearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "songId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
-            "name": "Idempotency-Key",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "youtube": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                        "maxLength": 200
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "spotify": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                        "maxLength": 2000
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "applemusic": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                        "maxLength": 2000
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                "required": [
-                  "youtube",
-                  "spotify",
-                  "applemusic"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Whether the links actually changed.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "song_id": {
-                          "type": "integer",
-                          "minimum": -9007199254740991,
-                          "maximum": 9007199254740991
-                        },
-                        "changed": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [
-                        "song_id",
-                        "changed"
                       ]
                     }
                   },
@@ -12895,11 +12998,12 @@
                 "total_unpublished",
                 "newest",
                 "oldest",
-                "updated_at"
+                "updated_at",
+                "relevance"
               ],
               "default": "total_songs"
             },
-            "description": "Sort column."
+            "description": "Sort column. `relevance` ranks keyword matches first, then total_songs."
           },
           {
             "name": "order_direction",
@@ -14765,6 +14869,12 @@
                           "name": {
                             "type": "string"
                           },
+                          "short_name": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "company_name": {
                             "type": [
                               "string",
@@ -14799,6 +14909,7 @@
                         "required": [
                           "id",
                           "name",
+                          "short_name",
                           "company_name",
                           "logo_url",
                           "status",
@@ -14896,6 +15007,17 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 200
+                  },
+                  "short_name": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   }
                 },
                 "required": [
@@ -14923,11 +15045,18 @@
                         },
                         "name": {
                           "type": "string"
+                        },
+                        "short_name": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
                         "id",
-                        "name"
+                        "name",
+                        "short_name"
                       ]
                     }
                   },
@@ -14959,7 +15088,7 @@
         "tags": [
           "Backstage"
         ],
-        "summary": "Update a label's name, company name or status (backstage)",
+        "summary": "Update a label's name, short name, company name or status (backstage)",
         "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header. Only the supplied fields change.",
         "security": [
           {
@@ -14995,6 +15124,17 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 200
+                  },
+                  "short_name": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   },
                   "company_name": {
                     "anyOf": [
@@ -15038,6 +15178,12 @@
                         "name": {
                           "type": "string"
                         },
+                        "short_name": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "company_name": {
                           "type": [
                             "string",
@@ -15055,6 +15201,7 @@
                       "required": [
                         "id",
                         "name",
+                        "short_name",
                         "company_name",
                         "status"
                       ]
@@ -15132,11 +15279,18 @@
                         },
                         "name": {
                           "type": "string"
+                        },
+                        "short_name": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
                         "id",
-                        "name"
+                        "name",
+                        "short_name"
                       ]
                     }
                   },
