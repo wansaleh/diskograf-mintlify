@@ -709,7 +709,7 @@
           "Meta"
         ],
         "summary": "Get catalogue statistics",
-        "description": "Totals across the archive: songs, artists, contributors, credits, genres, labels, the earliest release year on record, and the count of songs released since the start of the previous calendar month.",
+        "description": "Totals across the archive: songs, artists, contributors, credits, genres, labels, the earliest release year on record, and the count of songs released in the last 30 days.",
         "responses": {
           "200": {
             "description": "Catalogue totals.",
@@ -773,7 +773,7 @@
                             "count",
                             "released_from"
                           ],
-                          "description": "Published songs released since the start of the previous calendar month."
+                          "description": "Published songs released in the last 30 days."
                         }
                       },
                       "required": [
@@ -2471,6 +2471,96 @@
                         "apple_music"
                       ],
                       "description": "Stored provider snapshots. Clients compare ids and last_fetched to decide whether a refresh is due."
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/songs/{songId}/chart-run": {
+      "get": {
+        "operationId": "getV1SongsBySongIdChartRun",
+        "tags": [
+          "Songs"
+        ],
+        "summary": "Get Top Songs chart run",
+        "description": "Recorded days in the daily Current Top Songs chart, limited to the top 30.",
+        "parameters": [
+          {
+            "name": "songId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The song chart totals.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "days_in_chart": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "days_at_number_one": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "peak_rank": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "first_charted_on": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "last_charted_on": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "days_in_chart",
+                        "days_at_number_one",
+                        "peak_rank",
+                        "first_charted_on",
+                        "last_charted_on"
+                      ],
+                      "description": "Days this song spent in the daily Top Songs Current chart (top 30). Zero and nulls when it never charted."
                     }
                   },
                   "required": [
@@ -5165,7 +5255,7 @@
           "Search"
         ],
         "summary": "Search or look up artwork",
-        "description": "Proxies Apple Music/iTunes and Spotify for the artwork finder tool and the song editor's artwork/streaming-link fields. Pass `uri`+`from` for a single-track lookup, or `title` for a keyword search. Callable only from diskograf.com (Origin/Referer checked).",
+        "description": "Proxies Apple Music/iTunes and Spotify for the artwork finder tool and the song editor's artwork/streaming-link fields. Pass `uri`+`from` for a single track-or-album lookup, or `title` for a keyword search. Callable only from diskograf.com (Origin/Referer checked).",
         "parameters": [
           {
             "name": "title",
@@ -5181,7 +5271,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "A Spotify or Apple Music track URI/link to look up directly. Requires `from`."
+            "description": "A Spotify track or album URI/link, or an Apple Music track URI/link, to look up directly. Requires `from`."
           },
           {
             "name": "from",
@@ -6724,10 +6814,21 @@
                               "name": {
                                 "type": "string"
                               },
+                              "formerly_known_as": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
                               "slug": {
                                 "type": "string"
                               },
                               "song_count": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "album_count": {
                                 "type": "integer",
                                 "minimum": -9007199254740991,
                                 "maximum": 9007199254740991
@@ -6736,8 +6837,10 @@
                             "required": [
                               "id",
                               "name",
+                              "formerly_known_as",
                               "slug",
-                              "song_count"
+                              "song_count",
+                              "album_count"
                             ]
                           }
                         },
@@ -7482,7 +7585,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Keyword search across label names."
+            "description": "Keyword search across current and former label names."
           },
           {
             "name": "sort",
@@ -7543,10 +7646,21 @@
                           "name": {
                             "type": "string"
                           },
+                          "formerly_known_as": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "slug": {
                             "type": "string"
                           },
                           "song_count": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "album_count": {
                             "type": "integer",
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
@@ -7555,8 +7669,10 @@
                         "required": [
                           "id",
                           "name",
+                          "formerly_known_as",
                           "slug",
-                          "song_count"
+                          "song_count",
+                          "album_count"
                         ]
                       }
                     },
@@ -7647,6 +7763,12 @@
                         "name": {
                           "type": "string"
                         },
+                        "formerly_known_as": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "company_name": {
                           "type": [
                             "string",
@@ -7666,15 +7788,22 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991
+                        },
+                        "album_count": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
                         }
                       },
                       "required": [
                         "id",
                         "name",
+                        "formerly_known_as",
                         "company_name",
                         "logo_url",
                         "status",
-                        "song_count"
+                        "song_count",
+                        "album_count"
                       ]
                     }
                   },
@@ -7975,7 +8104,7 @@
             "schema": {
               "type": "string",
               "enum": [
-                "since-last-month",
+                "current",
                 "this-year",
                 "all-time"
               ]
@@ -8613,7 +8742,7 @@
           "Labels"
         ],
         "summary": "List top record-label charts",
-        "description": "The ten highest-ranked labels, each with up to ten published songs. `all-time` uses the all-time Top Songs score. `since-last-month` leads with songs from the current window, then fills a short chart from that label's all-time top songs. Labels with no songs in the window are omitted. The label ranking itself does not depend on `period`.",
+        "description": "The ten highest-ranked labels, each with up to ten published songs. `all-time` uses the all-time Top Songs score. `current` leads with songs from the current window, then fills a short chart from that label's all-time top songs. Labels with no songs in the window are omitted. The label ranking itself does not depend on `period`.",
         "parameters": [
           {
             "name": "period",
@@ -8621,10 +8750,10 @@
             "schema": {
               "type": "string",
               "enum": [
-                "since-last-month",
+                "current",
                 "all-time"
               ],
-              "default": "since-last-month"
+              "default": "current"
             }
           }
         ],
@@ -12999,6 +13128,7 @@
                 "newest",
                 "oldest",
                 "updated_at",
+                "credits_updated_at",
                 "relevance"
               ],
               "default": "total_songs"
@@ -13158,6 +13288,12 @@
                               "null"
                             ]
                           },
+                          "credits_updated_at": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "added_by_username": {
                             "type": [
                               "string",
@@ -13267,6 +13403,7 @@
                           "total_unpublished",
                           "created_at",
                           "updated_at",
+                          "credits_updated_at",
                           "added_by_username",
                           "updated_by_username",
                           "username",
@@ -13332,6 +13469,329 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/artists/health": {
+      "get": {
+        "operationId": "getV1AdminArtistsHealth",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Artist health scan (backstage)",
+        "description": "Authenticated, admin-only. Live scan of artists with no credit on a visible song, grouped by reason, plus totals and role-assignment drift. Read-only.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Health buckets (capped at 200 artists each) and drift counts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "generated_at": {
+                          "type": "string"
+                        },
+                        "buckets": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string",
+                                "enum": [
+                                  "empty",
+                                  "stale_roles_only",
+                                  "hidden_credits_only",
+                                  "collab_only",
+                                  "linked_user"
+                                ]
+                              },
+                              "deletable": {
+                                "type": "boolean"
+                              },
+                              "count": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "artists": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "created_at": {
+                                      "type": "string"
+                                    },
+                                    "hidden_credits": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "stale_roles": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "collab_links": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name",
+                                    "created_at",
+                                    "hidden_credits",
+                                    "stale_roles",
+                                    "collab_links"
+                                  ]
+                                }
+                              }
+                            },
+                            "required": [
+                              "key",
+                              "deletable",
+                              "count",
+                              "artists"
+                            ]
+                          }
+                        },
+                        "drift": {
+                          "type": "object",
+                          "properties": {
+                            "totals": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "roles_missing": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "roles_unbacked": {
+                              "type": "object",
+                              "properties": {
+                                "count": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                "artists": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "type": "integer",
+                                        "minimum": -9007199254740991,
+                                        "maximum": 9007199254740991
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      },
+                                      "role_ids": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "integer",
+                                          "minimum": -9007199254740991,
+                                          "maximum": 9007199254740991
+                                        }
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name",
+                                      "role_ids"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "count",
+                                "artists"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "totals",
+                            "roles_missing",
+                            "roles_unbacked"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "generated_at",
+                        "buckets",
+                        "drift"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/artists/health/delete": {
+      "patch": {
+        "operationId": "patchV1AdminArtistsHealthDelete",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Delete reviewed unused artists (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header. Each artist is rechecked live (no credits, no collaborator links, no linked user, older than 48 hours) and skipped with a reason if it fails.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "artist_ids": {
+                    "minItems": 1,
+                    "maxItems": 200,
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  }
+                },
+                "required": [
+                  "artist_ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Deleted artists and skipped ids with reasons.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "deleted": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ]
+                          }
+                        },
+                        "skipped": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "reason": {
+                                "type": "string",
+                                "enum": [
+                                  "not_found",
+                                  "has_credits",
+                                  "has_collab_links",
+                                  "linked_user",
+                                  "too_new"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "reason"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "deleted",
+                        "skipped"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
@@ -14229,87 +14689,14 @@
         }
       }
     },
-    "/v1/admin/artists/cleanup-orphans": {
-      "patch": {
-        "operationId": "patchV1AdminArtistsCleanupOrphans",
-        "tags": [
-          "Backstage"
-        ],
-        "summary": "Delete abandoned orphan artists (backstage)",
-        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header. Deletes artists with zero songs, zero credits, no linked user, older than 48 hours — safe to run repeatedly.",
-        "security": [
-          {
-            "backstageBearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "Idempotency-Key",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "How many candidates were checked and deleted.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "checked": {
-                          "type": "integer",
-                          "minimum": -9007199254740991,
-                          "maximum": 9007199254740991
-                        },
-                        "deleted": {
-                          "type": "integer",
-                          "minimum": -9007199254740991,
-                          "maximum": 9007199254740991
-                        }
-                      },
-                      "required": [
-                        "checked",
-                        "deleted"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "409": {
-            "description": "A request with this Idempotency-Key is already in progress."
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          }
-        }
-      }
-    },
     "/v1/admin/artists/rebuild-role-assignments": {
       "patch": {
         "operationId": "patchV1AdminArtistsRebuildRoleAssignments",
         "tags": [
           "Backstage"
         ],
-        "summary": "Rebuild the derived artist_role index (backstage)",
-        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header. Additive and safe to run repeatedly.",
+        "summary": "Sync the derived artist_role index with song credits (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header. Adds missing role rows and removes rows with no matching song credit; roles cannot be assigned by hand. Safe to run repeatedly.",
         "security": [
           {
             "backstageBearerAuth": []
@@ -14341,6 +14728,11 @@
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991
                         },
+                        "removed": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
                         "artists": {
                           "type": "integer",
                           "minimum": -9007199254740991,
@@ -14349,6 +14741,7 @@
                       },
                       "required": [
                         "inserted",
+                        "removed",
                         "artists"
                       ]
                     }
@@ -14788,7 +15181,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Fuzzy search across the label name."
+            "description": "Fuzzy search across current and former label names."
           },
           {
             "name": "cursor",
@@ -14869,6 +15262,12 @@
                           "name": {
                             "type": "string"
                           },
+                          "formerly_known_as": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "short_name": {
                             "type": [
                               "string",
@@ -14904,18 +15303,25 @@
                             "type": "integer",
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
+                          },
+                          "album_count": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
                           }
                         },
                         "required": [
                           "id",
                           "name",
+                          "formerly_known_as",
                           "short_name",
                           "company_name",
                           "logo_url",
                           "status",
                           "created_at",
                           "updated_at",
-                          "song_count"
+                          "song_count",
+                          "album_count"
                         ]
                       }
                     },
@@ -15008,6 +15414,17 @@
                     "minLength": 1,
                     "maxLength": 200
                   },
+                  "formerly_known_as": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
                   "short_name": {
                     "anyOf": [
                       {
@@ -15046,6 +15463,12 @@
                         "name": {
                           "type": "string"
                         },
+                        "formerly_known_as": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "short_name": {
                           "type": [
                             "string",
@@ -15056,6 +15479,7 @@
                       "required": [
                         "id",
                         "name",
+                        "formerly_known_as",
                         "short_name"
                       ]
                     }
@@ -15125,6 +15549,17 @@
                     "minLength": 1,
                     "maxLength": 200
                   },
+                  "formerly_known_as": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
                   "short_name": {
                     "anyOf": [
                       {
@@ -15178,6 +15613,12 @@
                         "name": {
                           "type": "string"
                         },
+                        "formerly_known_as": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "short_name": {
                           "type": [
                             "string",
@@ -15201,6 +15642,7 @@
                       "required": [
                         "id",
                         "name",
+                        "formerly_known_as",
                         "short_name",
                         "company_name",
                         "status"
@@ -15280,6 +15722,12 @@
                         "name": {
                           "type": "string"
                         },
+                        "formerly_known_as": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "short_name": {
                           "type": [
                             "string",
@@ -15290,6 +15738,7 @@
                       "required": [
                         "id",
                         "name",
+                        "formerly_known_as",
                         "short_name"
                       ]
                     }
@@ -18315,6 +18764,14 @@
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991
                         },
+                        "affected_label_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
                         "label_ids": {
                           "type": "array",
                           "items": {
@@ -18326,6 +18783,7 @@
                       },
                       "required": [
                         "id",
+                        "affected_label_ids",
                         "label_ids"
                       ]
                     }
@@ -18586,10 +19044,19 @@
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991
+                        },
+                        "affected_label_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
                         }
                       },
                       "required": [
-                        "id"
+                        "id",
+                        "affected_label_ids"
                       ]
                     }
                   },
