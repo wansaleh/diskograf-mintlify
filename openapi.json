@@ -409,7 +409,7 @@
           "Search"
         ],
         "summary": "Search the catalogue",
-        "description": "Cross-category keyword search over songs, artists and labels — the same search that backs the site header, including artist:/label:/year:/decade: filters, yt:\"...\" YouTube metadata search, and \"quoted phrase\" literal matching. Callable only from diskograf.com (Origin/Referer checked) — this is the one route meant for direct browser calls from the site itself, not third-party use.",
+        "description": "Cross-category keyword search over songs, albums, artists and labels — the same search that backs the site header, including artist:/label:/genre:/year:/decade: filters, yt:\"...\" YouTube metadata search, and \"quoted phrase\" literal matching. Callable only from diskograf.com (Origin/Referer checked) — this is the one route meant for direct browser calls from the site itself, not third-party use.",
         "parameters": [
           {
             "name": "q",
@@ -418,7 +418,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The keyword. Required, and capped in length. Supports artist:/label:/year:/decade: filters, yt:\"...\" for a literal search of cached YouTube title/channel/description, and \"quoted phrase\" literals."
+            "description": "The keyword. Required, and capped in length. Supports artist:/label:/genre:/year:/decade: filters, yt:\"...\" for a literal search of cached YouTube title/channel/description, and \"quoted phrase\" literals."
           },
           {
             "name": "scope",
@@ -428,10 +428,11 @@
               "enum": [
                 "all",
                 "songs",
+                "albums",
                 "artists"
               ]
             },
-            "description": "Limit results to one category. `songs`/`artists` return an empty array for the other two. Labels are only ever returned for scope=all (or when omitted), matching the site search."
+            "description": "Limit results to one category. `songs`/`albums`/`artists` return empty arrays for other categories. Labels are only ever returned for scope=all (or when omitted), matching the site search."
           },
           {
             "name": "limit",
@@ -441,7 +442,7 @@
               "minimum": 1,
               "maximum": 50
             },
-            "description": "Max rows per category in scope. Omit for the default per-category caps (songs: 50, labels: 20, artists: 30)."
+            "description": "Max rows per category in scope. Omit for the default per-category caps (songs: 50, labels: 20, artists: 30, albums: 30)."
           }
         ],
         "responses": {
@@ -576,6 +577,101 @@
                             ]
                           }
                         },
+                        "albums": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "album_type": {
+                                "type": "string",
+                                "enum": [
+                                  "album",
+                                  "ep",
+                                  "single"
+                                ],
+                                "description": "Album release type."
+                              },
+                              "artwork_url": {
+                                "description": "Absolute CDN URL for the album artwork.",
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "song_count": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "latest_released_at": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "artists": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "prefix_title": {
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
+                                    },
+                                    "is_group": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "avatar_url": {
+                                      "description": "Resolved public CDN URL for the artist avatar.",
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name",
+                                    "prefix_title",
+                                    "is_group",
+                                    "avatar_url"
+                                  ]
+                                },
+                                "description": "Explicit album artists, or primary artists resolved from visible tracks."
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "title",
+                              "album_type",
+                              "artwork_url",
+                              "song_count",
+                              "latest_released_at",
+                              "artists"
+                            ]
+                          }
+                        },
                         "artists": {
                           "type": "array",
                           "items": {
@@ -681,6 +777,7 @@
                       },
                       "required": [
                         "songs",
+                        "albums",
                         "artists",
                         "labels"
                       ]
