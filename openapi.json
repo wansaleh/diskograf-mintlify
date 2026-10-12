@@ -429,10 +429,11 @@
                 "all",
                 "songs",
                 "albums",
-                "artists"
+                "artists",
+                "labels"
               ]
             },
-            "description": "Limit results to one category. `songs`/`albums`/`artists` return empty arrays for other categories. Labels are only ever returned for scope=all (or when omitted), matching the site search."
+            "description": "Limit results to one category. Scoped searches return empty arrays for other categories."
           },
           {
             "name": "limit",
@@ -3330,6 +3331,66 @@
         }
       }
     },
+    "/v1/songs/{songId}/lyrics": {
+      "get": {
+        "operationId": "getV1SongsBySongIdLyrics",
+        "tags": [
+          "Songs"
+        ],
+        "summary": "Get a song's lyrics",
+        "description": "The lyric text for one published song, on its own so the song page's lyrics panel can fetch it in the browser after mount. `lyrics` is null when the song has no lyrics; an unpublished or deleted song is a 404.",
+        "parameters": [
+          {
+            "name": "songId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The song lyrics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "song_id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "lyrics": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "song_id",
+                        "lyrics"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
     "/v1/albums": {
       "get": {
         "operationId": "getV1Albums",
@@ -3337,7 +3398,7 @@
           "Albums"
         ],
         "summary": "List albums",
-        "description": "Published albums with at least one published, non-deleted song and resolved artist avatar URLs. Returned whole by default; pass `limit` to page through them instead, optionally with `artist_id`, `keyword`, and an order. `meta.total` is then the filtered total, not the page size.",
+        "description": "Published albums with at least one published, non-deleted song and resolved artist avatar URLs. Returned whole by default; pass `limit` to page through them instead, optionally with `artist_id`, `label_id`, `keyword`, and an order. `meta.total` is then the filtered total, not the page size.",
         "parameters": [
           {
             "name": "keyword",
@@ -3354,6 +3415,14 @@
               "type": "integer"
             },
             "description": "Restrict to albums where this artist is explicit, or primary on visible tracks when the album has no explicit artists."
+          },
+          {
+            "name": "label_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Restrict to albums directly assigned to this non-deleted label."
           },
           {
             "name": "limit",
@@ -3952,6 +4021,14 @@
             "description": "True for groups only, false for individuals only."
           },
           {
+            "name": "has_album",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "True for artists with public albums, false for artists without them. Uses explicit album artists, or primary track artists when no explicit artists exist."
+          },
+          {
             "name": "gender",
             "in": "query",
             "schema": {
@@ -3972,11 +4049,11 @@
               "enum": [
                 "relevance",
                 "name",
-                "total_songs"
-              ],
-              "default": "relevance"
+                "total_songs",
+                "album_count"
+              ]
             },
-            "description": "Sort column. `relevance` ranks search matches first and falls back to total_songs without `q`. Other columns ignore search relevance."
+            "description": "Sort column. Defaults to album_count when has_album=true, otherwise relevance. `relevance` ranks search matches first and falls back to total_songs without `q`. Other columns ignore search relevance."
           },
           {
             "name": "order",
@@ -4070,6 +4147,20 @@
                               }
                             ],
                             "description": "Published songs where the artist holds every requested role and any requested genre. Null when no role or genre filter is active."
+                          },
+                          "album_count": {
+                            "default": null,
+                            "description": "Public album count when has_album=true or sort=album_count. Uses explicit album artists, or primary track artists when no explicit artists exist. Null or absent otherwise.",
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           },
                           "total_credits": {
                             "anyOf": [
@@ -6813,6 +6904,20 @@
                                 ],
                                 "description": "Published songs where the artist holds every requested role and any requested genre. Null when no role or genre filter is active."
                               },
+                              "album_count": {
+                                "default": null,
+                                "description": "Public album count when has_album=true or sort=album_count. Uses explicit album artists, or primary track artists when no explicit artists exist. Null or absent otherwise.",
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
                               "total_credits": {
                                 "anyOf": [
                                   {
@@ -7688,8 +7793,14 @@
             "name": "sort",
             "in": "query",
             "schema": {
-              "type": "string"
-            }
+              "type": "string",
+              "enum": [
+                "name",
+                "total_songs",
+                "album_count"
+              ]
+            },
+            "description": "Sort by name, public song count, or public album count. Defaults to total_songs."
           },
           {
             "name": "order",
@@ -8258,6 +8369,23 @@
                           },
                           "released_at": {
                             "type": "string"
+                          },
+                          "date_type": {
+                            "default": null,
+                            "description": "Release date precision. Null means unknown; YEAR does not specify a release month.",
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "FULL",
+                                  "MONTH",
+                                  "YEAR"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           },
                           "artwork_url": {
                             "type": "string"
@@ -8899,6 +9027,23 @@
                                 },
                                 "released_at": {
                                   "type": "string"
+                                },
+                                "date_type": {
+                                  "default": null,
+                                  "description": "Release date precision. Null means unknown; YEAR does not specify a release month.",
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "enum": [
+                                        "FULL",
+                                        "MONTH",
+                                        "YEAR"
+                                      ]
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 },
                                 "artwork_url": {
                                   "type": "string"
@@ -10766,6 +10911,112 @@
           },
           "504": {
             "description": "YouTube did not respond in time."
+          }
+        }
+      }
+    },
+    "/v1/youtube/charts": {
+      "get": {
+        "operationId": "getV1YoutubeCharts",
+        "tags": [
+          "Songs"
+        ],
+        "summary": "Get YouTube chart ranks",
+        "description": "Chart positions from Malaysia's YouTube Music charts — Trending, Top Videos (daily) and Top Songs (weekly) — as one row per chart, mapping YouTube video id to rank. These are the ranks behind the chart badges on song artwork. Snapshots refresh in the background every 12 hours.",
+        "responses": {
+          "200": {
+            "description": "One row per chart. `fetched_at` is null when no snapshot is stored for it yet, and `ranks` is then empty.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "trending",
+                              "topVideos",
+                              "topSongs"
+                            ]
+                          },
+                          "fetched_at": {
+                            "description": "ISO timestamp of the stored snapshot. Null when Redis holds no snapshot for this chart yet.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "ranks": {
+                            "type": "object",
+                            "propertyNames": {
+                              "type": "string"
+                            },
+                            "additionalProperties": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "description": "YouTube video id to 1-based chart position. A video an editor replaced is aliased onto the song's current video id."
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "fetched_at",
+                          "ranks"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Total rows matching the query, ignoring page size and position."
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Page size actually applied. Bounded by apiConfig.maxLimit (80)."
+                        },
+                        "offset": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Zero-based row offset of this page. Legacy field when a cursor is used."
+                        },
+                        "next_cursor": {
+                          "description": "Opaque cursor for the next page. Null means there is no next page.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "limit",
+                        "offset"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Chart storage is not configured."
           }
         }
       }
@@ -15059,88 +15310,6 @@
         }
       }
     },
-    "/v1/admin/artists/{artistId}/avatar-remove": {
-      "patch": {
-        "operationId": "patchV1AdminArtistsByArtistIdAvatarRemove",
-        "tags": [
-          "Backstage"
-        ],
-        "summary": "Remove an artist's avatar (backstage)",
-        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header. Rejected when the artist links to a user account — that image is owned by the account.",
-        "security": [
-          {
-            "backstageBearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "artistId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
-            "name": "Idempotency-Key",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The artist row after the avatar was cleared.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "integer",
-                          "minimum": -9007199254740991,
-                          "maximum": 9007199254740991
-                        },
-                        "name": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "name"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "description": "A request with this Idempotency-Key is already in progress."
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          }
-        }
-      }
-    },
     "/v1/admin/artists/merge": {
       "patch": {
         "operationId": "patchV1AdminArtistsMerge",
@@ -15245,6 +15414,88 @@
           },
           "403": {
             "description": "The token does not belong to a super user."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/artists/{artistId}/avatar-remove": {
+      "patch": {
+        "operationId": "patchV1AdminArtistsByArtistIdAvatarRemove",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Remove an artist's avatar (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header. Rejected when the artist links to a user account — that image is owned by the account.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "artistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The artist row after the avatar was cleared.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
@@ -15775,8 +16026,8 @@
         "tags": [
           "Backstage"
         ],
-        "summary": "Delete a label (backstage)",
-        "description": "Authenticated, admin-only, write-scoped. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "summary": "Permanently delete a trashed label (backstage)",
+        "description": "Authenticated, super-only, write-scoped. Requires a `write`-scope backstage token minted for a super user and an `Idempotency-Key` header. Irreversible — only allowed on an already trashed label.",
         "security": [
           {
             "backstageBearerAuth": []
@@ -15847,8 +16098,192 @@
               }
             }
           },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The token does not belong to a super user."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/labels/{labelId}/trash": {
+      "patch": {
+        "operationId": "patchV1AdminLabelsByLabelIdTrash",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Trash a label (backstage)",
+        "description": "Authenticated, admin-only, write-scoped. Soft-deletes the label; song/album links are kept. Requires a `write`-scope backstage token and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "labelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The trashed label.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "deleted_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "deleted_at"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A request with this Idempotency-Key is already in progress."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/admin/labels/{labelId}/restore": {
+      "patch": {
+        "operationId": "patchV1AdminLabelsByLabelIdRestore",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Restore a trashed label (backstage)",
+        "description": "Authenticated, super-only, write-scoped. Requires a `write`-scope backstage token minted for a super user and an `Idempotency-Key` header.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "labelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The restored label.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "deleted_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "deleted_at"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The token does not belong to a super user."
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
