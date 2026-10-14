@@ -5553,7 +5553,7 @@
           "Artists"
         ],
         "summary": "List an artist's collaborators",
-        "description": "The artists credited most often alongside this artist on published songs, in any role, with the shared song count. Ordered by song count, then name. Returns the top 10 by default; pass `limit` for more. Derived from credits, unlike the editor-picked associated acts on the artist profile.",
+        "description": "The artists credited most often alongside this artist on published songs, in any role, with the shared song count. Ordered by song count, then name. Returns the top 10 by default; pass `limit` and `offset` to page, and `q` to match names. Derived from credits, unlike the editor-picked associated acts on the artist profile.",
         "parameters": [
           {
             "name": "artistId",
@@ -5572,6 +5572,25 @@
               "minimum": 1,
               "maximum": 500,
               "default": 10
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 100
             }
           }
         ],
