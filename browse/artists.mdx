@@ -35,7 +35,7 @@ An artist profile can include:
 - Group or solo status, location, and social links when available
 - Genre breakdown
 - Full discography with credited roles
-- Associated acts and collaborators when available
+- Associated acts, top collaborators, and labels when available
 
 ### Filter an artist's works
 
@@ -43,14 +43,19 @@ The works grid can be narrowed by:
 
 - Credit role
 - One or more genres
+- Collaborator: songs the artist shares with one other artist
+- Label: songs released on one label, where the artist is the lead performer
 - Keyword search
 
-You can also sort works by latest or oldest release, YouTube views, views per day, trending order, title, or catalogue order. The results are paginated, and active filters are reflected in the URL.
+The sidebar lists the 10 artists this artist has worked with most. Click one to see only the songs they share. The **Collaborator** filter lists everyone the artist has worked with, with a shared song count for each. Type a name to find a collaborator.
+
+You can also sort works by latest or oldest release, YouTube views, views per day, title, or catalogue order. The results are paginated, and active filters are reflected in the URL.
 
 For example:
 
 ```text
 diskograf.com/artist/{id}-{slug}?genre=ballad
+diskograf.com/artist/{id}-{slug}?with={collaborator-artist-id}
 ```
 
 ## Artist aliases
