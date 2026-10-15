@@ -967,6 +967,14 @@
             "description": "Genre slug. Repeat the parameter or comma-separate for several."
           },
           {
+            "name": "exclude_genre",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exclude songs with any selected genre slug. Repeat or comma-separate, up to ten slugs. Exclusions override inclusions."
+          },
+          {
             "name": "role",
             "in": "query",
             "schema": {
@@ -4013,6 +4021,22 @@
             "description": "Genre slug. Repeat or comma-separate to accept any selected genre."
           },
           {
+            "name": "exclude_role",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exclude artists with any selected role slug. Repeat or comma-separate, up to ten slugs. Exclusions override inclusions."
+          },
+          {
+            "name": "exclude_genre",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exclude artists with any selected genre on published, non-deleted works. Repeat or comma-separate, up to ten slugs. Exclusions override inclusions."
+          },
+          {
             "name": "status",
             "in": "query",
             "schema": {
@@ -5206,6 +5230,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "exclude_genre",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exclude songs with any selected genre slug. Repeat or comma-separate, up to ten slugs. Exclusions override inclusions."
           },
           {
             "name": "role",
@@ -7804,6 +7836,14 @@
             }
           },
           {
+            "name": "exclude_genre",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exclude songs with any selected genre slug. Repeat or comma-separate, up to ten slugs. Exclusions override inclusions."
+          },
+          {
             "name": "gender",
             "in": "query",
             "schema": {
@@ -8318,6 +8358,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "exclude_genre",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exclude songs with any selected genre slug. Repeat or comma-separate, up to ten slugs. Exclusions override inclusions."
           },
           {
             "name": "role",
@@ -10805,6 +10853,14 @@
             }
           },
           {
+            "name": "exclude_genre",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exclude songs with any selected genre slug. Repeat or comma-separate, up to ten slugs. Exclusions override inclusions."
+          },
+          {
             "name": "role",
             "in": "query",
             "schema": {
@@ -11335,6 +11391,14 @@
               "type": "string"
             },
             "description": "Match songs with any selected genre slug. Repeat the parameter for several."
+          },
+          {
+            "name": "exclude_genre",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exclude songs with any selected genre slug. Repeat for several. Exclusions override inclusions."
           },
           {
             "name": "quality",
@@ -13714,6 +13778,22 @@
               "type": "string"
             },
             "description": "Restrict to artists who have worked on this genre slug. Repeat the parameter for several."
+          },
+          {
+            "name": "exclude_role",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exclude artists with any selected role slug. Repeat for several. Exclusions override inclusions."
+          },
+          {
+            "name": "exclude_genre",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exclude artists with any selected genre on published, non-deleted works. Repeat for several. Exclusions override inclusions."
           },
           {
             "name": "cursor",
