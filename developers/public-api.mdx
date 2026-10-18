@@ -30,7 +30,8 @@ The API also supports browser requests through CORS. Use [`GET /v1`](#service-en
 
 ### Access
 
-- No authentication or API key is required.
+- Most routes need no authentication or API key.
+- Some chart routes need a chart token. See [Charts](#charts).
 - The API accepts `GET` and CORS preflight `OPTIONS` requests.
 - The API is read-only. It does not expose write, account, or administrative operations.
 
@@ -185,6 +186,27 @@ An unknown label returns `404`. The label detail endpoint intentionally returns 
 | `GET /v1/curated-lists/{listId}` | Returns one published editorial song list. | `listId` is a positive integer. |
 
 An unknown album, song, or curated list returns `404`. Album and curated-list responses exclude unpublished and deleted songs.
+
+### Charts
+
+| Method and route | Description | Parameters |
+| --- | --- | --- |
+| `GET /v1/top/songs` | Lists top songs for a chart period. | `period` is required: `current`, `this-year`, or `all-time`. Also `year`, `genre`, `limit`. |
+| `GET /v1/top/songs/updated-on` | Returns the date of the current Top Songs chart. | No query parameters. |
+| `GET /v1/top/songs/legacy` | Lists recent songs ranked by daily views. | `limit`, `days` |
+| `GET /v1/top/artists` | Returns the top artist charts, one per credit role. | `genre`, `year` |
+| `GET /v1/top/artists/filters` | Returns the genres and years you can use to filter the top artist charts. | No query parameters. |
+| `GET /v1/top/labels` | Returns the top label charts. | `period` is `current` or `all-time`. |
+
+Some chart routes need a chart token:
+
+- `GET /v1/top/songs` with `period=current` and a `limit` above 10. The default `limit` is 100, so you must set `limit` to 10 or less to call it without a token.
+- `GET /v1/top/artists`.
+- `GET /v1/top/labels`.
+
+A call without a valid token returns `401` with the `unauthorized` error code. Other periods and the other chart routes need no token.
+
+Chart tokens are for the diskograf.com website only. The site gives a token to signed-in users, and each token expires after 10 minutes. You cannot get a chart token for your own application.
 
 ### Public users and contributors
 
