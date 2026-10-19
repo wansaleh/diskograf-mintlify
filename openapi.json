@@ -21787,12 +21787,19 @@
                                       "string",
                                       "null"
                                     ]
+                                  },
+                                  "is_group": {
+                                    "type": [
+                                      "boolean",
+                                      "null"
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "id",
                                   "name",
-                                  "prefix_title"
+                                  "prefix_title",
+                                  "is_group"
                                 ]
                               },
                               {
