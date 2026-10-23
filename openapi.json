@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Diskograf API",
-    "description": "A public, read-only REST API over the Diskograf catalogue of Malaysian music.\n\nPublic endpoints require no authentication and expose only published\ncatalogue rows. Requests are rate limited to 360 per 60 seconds per IP address.\n\nThe `/v1/admin` endpoints are the exception: authenticated with a short-lived\nbearer token minted by diskograf.com for Backstage staff. They bypass API\nrate limits and are never cached because they expose unpublished rows.\n\nEvery successful response is wrapped in an envelope. List endpoints return\n`{ \"data\": [...], \"meta\": { \"total\", \"limit\", \"offset\", \"next_cursor\" } }`; detail endpoints\nreturn `{ \"data\": {...} }`. Errors return `{ \"error\": { \"code\", \"message\" } }`.",
+    "description": "A public, read-only REST API over the Diskograf catalogue of Malaysian music.\n\nPublic endpoints require no authentication and expose only published\ncatalogue rows. Requests are rate limited to 360 per 60 seconds per IP address.\n\nThe `/v1/admin` endpoints are the exception: authenticated with a short-lived\nbearer token minted by diskograf.com for Backstage staff. They bypass API\nrate limits and are never cached because they expose unpublished rows.\n\nThe `/v1/me` endpoints are the signed-in user's own private rows. They use a\nseparate notification-api token, derive the account from its subject and are\nnever cached, including their error responses.\n\nEvery successful response is wrapped in an envelope. List endpoints return\n`{ \"data\": [...], \"meta\": { \"total\", \"limit\", \"offset\", \"next_cursor\" } }`; detail endpoints\nreturn `{ \"data\": {...} }`. Errors return `{ \"error\": { \"code\", \"message\" } }`.",
     "version": "1.0.0"
   },
   "servers": [
@@ -71,6 +71,18 @@
         "scheme": "bearer",
         "bearerFormat": "JWT",
         "description": "Short-lived chart token minted by GET /api/chart-access-token on diskograf.com for any signed-in user."
+      },
+      "presenceBearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Ten-minute presence-api token from GET /api/presence-access-token. Records only the signed-in account presence."
+      },
+      "notificationBearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Ten-minute notification-api token from GET /api/notification-access-token. Reads, marks read or archives only the signed-in account's own notification rows; the account is always the token subject."
       }
     },
     "responses": {
@@ -943,6 +955,519 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v1/admin/users/online": {
+      "get": {
+        "operationId": "getV1AdminUsersOnline",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "List other online admins",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Up to ten other non-banned admins active within five minutes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "name": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "username": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "image": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "avatarData": {
+                            "type": "object",
+                            "properties": {
+                              "b2Avatar": {
+                                "type": "string"
+                              },
+                              "avatar": {
+                                "type": "string"
+                              },
+                              "cloudinaryAvatar": {
+                                "type": "object",
+                                "properties": {
+                                  "secure_url": {
+                                    "type": "string"
+                                  }
+                                },
+                                "additionalProperties": false
+                              }
+                            },
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "username",
+                          "image",
+                          "avatarData"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/me/presence": {
+      "post": {
+        "operationId": "postV1MePresence",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Record the signed-in user presence",
+        "description": "Requires a presence-api audience token from /api/presence-access-token. Updates only the token subject. No request body. Site origins only; public IP rate limits apply.",
+        "security": [
+          {
+            "presenceBearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Presence recorded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "ok": {
+                          "type": "boolean",
+                          "const": true
+                        }
+                      },
+                      "required": [
+                        "ok"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Origin or account is not allowed."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/me/notifications": {
+      "get": {
+        "operationId": "getV1MeNotifications",
+        "tags": [
+          "Users"
+        ],
+        "summary": "List the signed-in user's notifications",
+        "description": "Private, never cached. Most recent first, capped at 30. Archived rows and rows whose song is no longer pending (or whose feedback is already handled) are omitted. Requires a notification-api token from GET /api/notification-access-token. The account is the token subject — no owner id is accepted.",
+        "security": [
+          {
+            "notificationBearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The notification list for the token subject.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "songId": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "songTitle": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "actorName": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "actorUsername": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "title": {
+                                    "type": "string"
+                                  },
+                                  "preview": {
+                                    "type": "string"
+                                  },
+                                  "source": {
+                                    "type": "string",
+                                    "enum": [
+                                      "form",
+                                      "email"
+                                    ]
+                                  }
+                                },
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "readAt": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type",
+                          "songId",
+                          "songTitle",
+                          "actorName",
+                          "actorUsername",
+                          "data",
+                          "readAt",
+                          "createdAt"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Origin or account is not allowed."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/me/notifications/unread-count": {
+      "get": {
+        "operationId": "getV1MeNotificationsUnreadCount",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Count the signed-in user's unread notifications",
+        "description": "Private, never cached. Counts unread rows the dropdown would still show; archived-but-unread rows still count, because archiving only hides them from the list. Requires a notification-api token; the account is the token subject.",
+        "security": [
+          {
+            "notificationBearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The unread count for the token subject.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Origin or account is not allowed."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/me/notifications/read-all": {
+      "post": {
+        "operationId": "postV1MeNotificationsReadAll",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Mark all the signed-in user's notifications read",
+        "description": "Private, never cached. Sets read_at on every unread row owned by the token subject. Idempotent. Requires a notification-api token; no request body.",
+        "security": [
+          {
+            "notificationBearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The rows were marked read.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "ok": {
+                          "type": "boolean",
+                          "const": true
+                        }
+                      },
+                      "required": [
+                        "ok"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Origin or account is not allowed."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/me/notifications/archive-all": {
+      "post": {
+        "operationId": "postV1MeNotificationsArchiveAll",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Archive all the signed-in user's notifications",
+        "description": "Private, never cached. Sets archived_at on every not-yet-archived row owned by the token subject; read state is unchanged. Idempotent. Requires a notification-api token; no request body.",
+        "security": [
+          {
+            "notificationBearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The rows were archived.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "ok": {
+                          "type": "boolean",
+                          "const": true
+                        }
+                      },
+                      "required": [
+                        "ok"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Origin or account is not allowed."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/me/notifications/{id}/archive": {
+      "post": {
+        "operationId": "postV1MeNotificationsByIdArchive",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Archive one of the signed-in user's notifications",
+        "description": "Private, never cached. Sets archived_at only when the row belongs to the token subject; an id owned by another account is a silent no-op (never a 404), so the route cannot be used to probe other accounts. Idempotent. Requires a notification-api token; no request body.",
+        "security": [
+          {
+            "notificationBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The row was archived, or was not owned by the token subject.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "ok": {
+                          "type": "boolean",
+                          "const": true
+                        }
+                      },
+                      "required": [
+                        "ok"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Origin or account is not allowed."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
           }
         }
       }
@@ -3250,6 +3775,11 @@
                                     "string",
                                     "null"
                                   ]
+                                },
+                                "is_moderator": {
+                                  "default": false,
+                                  "description": "Public display badge for administrators, including super administrators. Does not grant permissions. Defaults to false for older API responses.",
+                                  "type": "boolean"
                                 }
                               },
                               "required": [
@@ -3285,6 +3815,11 @@
                                     "string",
                                     "null"
                                   ]
+                                },
+                                "is_moderator": {
+                                  "default": false,
+                                  "description": "Public display badge for administrators, including super administrators. Does not grant permissions. Defaults to false for older API responses.",
+                                  "type": "boolean"
                                 }
                               },
                               "required": [
@@ -3331,6 +3866,11 @@
                                           "string",
                                           "null"
                                         ]
+                                      },
+                                      "is_moderator": {
+                                        "default": false,
+                                        "description": "Public display badge for administrators, including super administrators. Does not grant permissions. Defaults to false for older API responses.",
+                                        "type": "boolean"
                                       }
                                     },
                                     "required": [
@@ -3559,7 +4099,7 @@
           "Songs"
         ],
         "summary": "Refresh a song's provider stats",
-        "description": "Calls YouTube, Spotify and Apple Music for the song's stored links, writes the snapshots, and has apps/web purge the song's provider-stat cache tags. Each provider reports its own status, so one missing snapshot never fails the other two. YouTube calls draw from a shared daily budget; once it is spent the stored YouTube snapshot is replayed as `stale` and the other two providers continue. Callable only from diskograf.com (Origin/Referer checked) with a Turnstile token solved for the `song_provider_refresh` action on a configured frontend host. Fails closed (503) when Turnstile or the cache callback is not provisioned.",
+        "description": "Calls YouTube, Spotify and Apple Music for the song's stored links, writes the snapshots, and has apps/web purge the song's provider-stat cache tags. Each provider reports its own status, so one missing snapshot never fails the other two. YouTube calls draw from a shared daily budget; once it is spent the stored YouTube snapshot is replayed as `stale` and the other two providers continue. Callable only from diskograf.com (Origin/Referer checked). Fails closed (503) when the cache callback is not provisioned.",
         "parameters": [
           {
             "name": "songId",
@@ -3570,28 +4110,6 @@
             }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "turnstile_token": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 2048,
-                    "description": "Cloudflare Turnstile response token from the song page widget."
-                  }
-                },
-                "required": [
-                  "turnstile_token"
-                ],
-                "description": "Body of the public provider-stats refresh. The admin twin takes an empty body."
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "One status per provider; `data` is present only on `ok`, and `from` marks a replayed snapshot (`cache` inside the 3h TTL, `stale` after a provider failure or an exhausted daily YouTube budget).",
@@ -3907,7 +4425,7 @@
             "$ref": "#/components/responses/BadRequest"
           },
           "403": {
-            "description": "Origin/Referer is not diskograf.com, or the Turnstile token was rejected."
+            "description": "Origin/Referer is not diskograf.com."
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
@@ -3916,10 +4434,10 @@
             "$ref": "#/components/responses/RateLimited"
           },
           "502": {
-            "description": "Bot protection is unavailable, or the snapshots were refreshed but the cache callback failed."
+            "description": "The snapshots were refreshed but the cache callback failed."
           },
           "503": {
-            "description": "Turnstile or the cache callback is not configured."
+            "description": "The cache callback is not configured."
           }
         }
       }
@@ -8649,6 +9167,234 @@
         }
       }
     },
+    "/v1/graph": {
+      "get": {
+        "operationId": "getV1Graph",
+        "tags": [
+          "Graph"
+        ],
+        "summary": "Get an ego graph around one entity",
+        "description": "Returns the nodes and edges within `depth` hops of one catalogue entity. Each expanded node keeps at most 50 neighbours per relation, chosen by popularity, and the whole graph is capped at 500 nodes. `hiddenLinks` and `truncated` report what the caps cut. Only publicly visible rows are returned. Callable only from diskograf.com (Origin/Referer checked).",
+        "parameters": [
+          {
+            "name": "focus",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(artist|song|album|label|genre):\\d+$"
+            },
+            "description": "The entity to centre the graph on, as `<type>:<id>`, for example `artist:42`."
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "enum": [
+                1,
+                2
+              ],
+              "default": 2
+            },
+            "description": "Hops to expand from the focus. Defaults to 2."
+          },
+          {
+            "name": "kinds",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma list of edge kinds: `performer`, `credit`, `song_label`, `album_song`, `album_label`, `song_genre`. Defaults to `performer,credit,song_label`. Album and genre nodes appear only when their kinds are enabled."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The graph around the focus.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "focus": {
+                      "type": "string",
+                      "description": "Focus node id."
+                    },
+                    "depth": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "const": 1
+                        },
+                        {
+                          "type": "number",
+                          "const": 2
+                        }
+                      ],
+                      "description": "Expansion depth."
+                    },
+                    "nodes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "Node id, `${type}:${entityId}`."
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "artist",
+                              "song",
+                              "album",
+                              "label",
+                              "genre"
+                            ]
+                          },
+                          "entityId": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991,
+                            "description": "Numeric id of the catalogue entity."
+                          },
+                          "label": {
+                            "type": "string",
+                            "description": "Display name."
+                          },
+                          "slug": {
+                            "description": "URL slug, or null when the entity has none.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "image": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "uri"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Image URL, or null."
+                          },
+                          "degree": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991,
+                            "description": "Total links for this node in the database."
+                          },
+                          "hiddenLinks": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991,
+                            "description": "Links not returned because of caps."
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type",
+                          "entityId",
+                          "label",
+                          "slug",
+                          "image",
+                          "degree",
+                          "hiddenLinks"
+                        ]
+                      }
+                    },
+                    "edges": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "Edge id."
+                          },
+                          "source": {
+                            "type": "string",
+                            "description": "Source node id."
+                          },
+                          "target": {
+                            "type": "string",
+                            "description": "Target node id."
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "performer",
+                              "credit",
+                              "song_label",
+                              "album_song",
+                              "album_label",
+                              "song_genre"
+                            ]
+                          },
+                          "role": {
+                            "description": "Role title for performer and credit edges, otherwise null.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "source",
+                          "target",
+                          "kind",
+                          "role"
+                        ]
+                      }
+                    },
+                    "truncated": {
+                      "type": "boolean",
+                      "description": "True when any caps cut links or nodes."
+                    },
+                    "kinds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "performer",
+                          "credit",
+                          "song_label",
+                          "album_song",
+                          "album_label",
+                          "song_genre"
+                        ]
+                      },
+                      "description": "Edge kinds enabled for this response."
+                    }
+                  },
+                  "required": [
+                    "focus",
+                    "depth",
+                    "nodes",
+                    "edges",
+                    "truncated",
+                    "kinds"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "description": "Origin/Referer is not diskograf.com."
+          },
+          "404": {
+            "description": "The focus does not exist or is not publicly visible."
+          }
+        }
+      }
+    },
     "/v1/labels": {
       "get": {
         "operationId": "getV1Labels",
@@ -12615,6 +13361,565 @@
           },
           "503": {
             "description": "Chart storage is not configured."
+          }
+        }
+      }
+    },
+    "/v1/admin/analysis": {
+      "get": {
+        "operationId": "getV1AdminAnalysis",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Super-only catalogue analysis",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "yearFrom",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9999
+            }
+          },
+          {
+            "name": "yearTo",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9999
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public-safe catalogue aggregates, refreshed within 24 hours.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "generatedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "filters": {
+                          "type": "object",
+                          "properties": {
+                            "yearFrom": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 1,
+                                  "maximum": 9999
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "yearTo": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 1,
+                                  "maximum": 9999
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "yearFrom",
+                            "yearTo"
+                          ]
+                        },
+                        "totals": {
+                          "type": "object",
+                          "properties": {
+                            "songs": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "artists": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "albums": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "labels": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "genres": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "roles": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "credits": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            }
+                          },
+                          "required": [
+                            "songs",
+                            "artists",
+                            "albums",
+                            "labels",
+                            "genres",
+                            "roles",
+                            "credits"
+                          ]
+                        },
+                        "releaseYears": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "year": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 9999
+                              },
+                              "songs": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "albums": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "year",
+                              "songs",
+                              "albums"
+                            ]
+                          }
+                        },
+                        "genres": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "slug": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "songs": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "slug",
+                              "title",
+                              "songs"
+                            ]
+                          }
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "slug": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "credits": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "slug",
+                              "title",
+                              "credits"
+                            ]
+                          }
+                        },
+                        "coverage": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string",
+                                "enum": [
+                                  "songGenres",
+                                  "songCredits",
+                                  "songLabels",
+                                  "albumReleaseDates",
+                                  "songLyrics"
+                                ]
+                              },
+                              "known": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "unknown": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "total": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "key",
+                              "known",
+                              "unknown",
+                              "total"
+                            ]
+                          }
+                        },
+                        "growth": {
+                          "type": "object",
+                          "properties": {
+                            "points": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "date": {
+                                    "type": "string"
+                                  },
+                                  "songs": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "artists": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "date",
+                                  "songs",
+                                  "artists"
+                                ]
+                              }
+                            },
+                            "bucket": {
+                              "type": "string",
+                              "enum": [
+                                "day",
+                                "week",
+                                "month"
+                              ]
+                            },
+                            "from": {
+                              "type": "string"
+                            },
+                            "to": {
+                              "type": "string"
+                            },
+                            "baseline": {
+                              "type": "object",
+                              "properties": {
+                                "songs": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                },
+                                "artists": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                }
+                              },
+                              "required": [
+                                "songs",
+                                "artists"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "points",
+                            "bucket",
+                            "from",
+                            "to",
+                            "baseline"
+                          ]
+                        },
+                        "unknownAlbumReleaseDates": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "wordStudy": {
+                          "type": "object",
+                          "properties": {
+                            "titles": {
+                              "type": "object",
+                              "properties": {
+                                "totalWords": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                },
+                                "uniqueWords": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                },
+                                "songsAnalyzed": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                },
+                                "songsMissing": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                },
+                                "topWords": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "word": {
+                                        "type": "string"
+                                      },
+                                      "occurrences": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 9007199254740991
+                                      },
+                                      "songs": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 9007199254740991
+                                      }
+                                    },
+                                    "required": [
+                                      "word",
+                                      "occurrences",
+                                      "songs"
+                                    ]
+                                  }
+                                },
+                                "topMeaningfulWords": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "word": {
+                                        "type": "string"
+                                      },
+                                      "occurrences": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 9007199254740991
+                                      },
+                                      "songs": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 9007199254740991
+                                      }
+                                    },
+                                    "required": [
+                                      "word",
+                                      "occurrences",
+                                      "songs"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "totalWords",
+                                "uniqueWords",
+                                "songsAnalyzed",
+                                "songsMissing",
+                                "topWords",
+                                "topMeaningfulWords"
+                              ]
+                            },
+                            "lyrics": {
+                              "type": "object",
+                              "properties": {
+                                "totalWords": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                },
+                                "uniqueWords": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                },
+                                "songsAnalyzed": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                },
+                                "songsMissing": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                },
+                                "topWords": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "word": {
+                                        "type": "string"
+                                      },
+                                      "occurrences": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 9007199254740991
+                                      },
+                                      "songs": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 9007199254740991
+                                      }
+                                    },
+                                    "required": [
+                                      "word",
+                                      "occurrences",
+                                      "songs"
+                                    ]
+                                  }
+                                },
+                                "topMeaningfulWords": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "word": {
+                                        "type": "string"
+                                      },
+                                      "occurrences": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 9007199254740991
+                                      },
+                                      "songs": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 9007199254740991
+                                      }
+                                    },
+                                    "required": [
+                                      "word",
+                                      "occurrences",
+                                      "songs"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "totalWords",
+                                "uniqueWords",
+                                "songsAnalyzed",
+                                "songsMissing",
+                                "topWords",
+                                "topMeaningfulWords"
+                              ]
+                            },
+                            "commonWords": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "required": [
+                            "titles",
+                            "lyrics",
+                            "commonWords"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "generatedAt",
+                        "filters",
+                        "totals",
+                        "releaseYears",
+                        "genres",
+                        "roles",
+                        "coverage",
+                        "growth",
+                        "unknownAlbumReleaseDates",
+                        "wordStudy"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid years"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "description": "Super access required"
           }
         }
       }
@@ -27244,6 +28549,65 @@
           },
           "503": {
             "description": "The classifier is not configured."
+          }
+        }
+      }
+    },
+    "/v1/admin/openpanel/live": {
+      "get": {
+        "operationId": "getV1AdminOpenpanelLive",
+        "tags": [
+          "Backstage"
+        ],
+        "summary": "Get the live visitor count",
+        "description": "Authenticated, admin-only. The site-wide live visitor count the header pill polls every two minutes, read from the same OpenPanel read-only client as the public song view counts. Missing OpenPanel configuration, an upstream error, a timeout, or an unusable payload all return `visitors: null` so the header hides the pill rather than surfacing an error. OpenPanel itself is read at most once per 120 seconds per isolate, behind this admin gate and keyed by the operator configuration. Replaces apps/web's retired /api/openpanel/live route; the response is private, no-store and never edge-cached, including on an auth failure.",
+        "security": [
+          {
+            "backstageBearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The current live visitor count, or null when it is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "visitors": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "visitors"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
           }
         }
       }
