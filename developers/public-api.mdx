@@ -4,7 +4,7 @@ sidebarTitle: "Public API"
 description: "Use Diskograf's read-only REST API to search and retrieve published songs, artists, genres, labels, and public contributor data."
 ---
 
-Diskograf provides a read-only REST API for the public catalogue. You can use it to search songs and artists, browse genres and labels, and build contributor-facing experiences around published Malaysian music data.
+Diskograf has a read-only REST API for the public catalogue. Use it to search songs and artists, browse genres and labels, and show public contributor data.
 
 ## Quick start
 
@@ -20,7 +20,7 @@ All catalogue routes are under `/v1`. Every catalogue request uses `GET` and is 
 curl "https://api.diskograf.com/v1/songs?q=hujan&limit=5"
 ```
 
-The API also supports browser requests through CORS. Use [`GET /v1`](#service-endpoints) to retrieve the current route index, or [`GET /health`](#service-endpoints) to check whether the service can reach its database.
+The API supports browser requests through CORS. [`GET /v1`](#service-endpoints) returns the route index. [`GET /health`](#service-endpoints) checks if the service can reach its database.
 
 <Info>
   The API is for reading public data. Use Diskograf's web app to sign in, contribute catalogue data, or manage an account.
@@ -57,7 +57,7 @@ Catalogue responses include these cache directives:
 Cache-Control: public, max-age=60, s-maxage=300, stale-while-revalidate=3600
 ```
 
-Treat responses as changeable. Cache them according to the response header rather than assuming that a record is immutable.
+Responses can change. Follow the cache header, and do not treat records as immutable.
 
 ## Response format
 
@@ -69,7 +69,7 @@ Most endpoints use one of these envelopes:
 | Item | `{ "data": {} }` | Single songs, artists, genres, labels, users, overviews, search, and stats |
 | Error | `{ "error": { "code": "...", "message": "..." } }` | API errors |
 
-For list responses, `meta.total` is the number of matching or returned records, depending on the endpoint. Full lists such as genres and roles use the list envelope even though they do not accept pagination parameters.
+For lists, `meta.total` is the number of matching or returned records, depending on the endpoint. Full lists, such as genres and roles, use the list envelope but take no pagination parameters.
 
 The health endpoint is the exception. It returns a direct status object rather than a `data` envelope.
 
@@ -298,9 +298,9 @@ Song detail adds `published_at`, `views`, `claps`, and the complete credit and c
 }
 ```
 
-Each credit contains `order`, an `artist` object, and a `role` object. A role can be `null` for an unclassified credit. Each artist includes a resolved `avatar_url`. Each role includes `id`, `title`, `slug`, `tag`, and `order`. Each genre contains `id`, `slug`, and `title`; each label contains `id` and `name`.
+Each credit has `order`, an `artist` object, and a `role` object. `role` is `null` for an unclassified credit. Each artist has a resolved `avatar_url`. Each role has `id`, `title`, `slug`, `tag`, and `order`. Each genre has `id`, `slug`, and `title`. Each label has `id` and `name`.
 
-Song detail also includes `notes`, `lyrics`, and `love_count`. The `media` object contains named YouTube, Spotify, Apple Music, date-type, and duration fields. The `youtube` object contains duration, views, views-per-day, and last-fetched fields. Raw song and YouTube JSON are not returned.
+Song detail also has `notes`, `lyrics`, and `love_count`. The `media` object holds YouTube, Spotify, Apple Music, date-type, and duration fields. The `youtube` object holds duration, views, views per day, and last-fetched time. Raw song and YouTube JSON are not returned.
 
 #### Song contributors
 
@@ -317,7 +317,7 @@ Song detail also includes `notes`, `lyrics`, and `love_count`. The `media` objec
 }
 ```
 
-The public user shape inside this response is `{ "username", "name", "avatar_url" }`. The `contributions` array contains the action name, timestamp, and public user for each event. This is a timeline, not a full historical snapshot of every version of a song.
+Public users here have the shape `{ "username", "name", "avatar_url" }`. Each `contributions` item has the action name, timestamp, and public user. This is a timeline, not a snapshot of every song version.
 
 #### Song provider stats
 
@@ -382,9 +382,9 @@ Label list items contain `id`, `name`, `slug`, and `song_count`. Label detail co
 
 An album summary contains `id`, `title`, `album_type`, `artwork_url`, `song_count`, and `latest_released_at`.
 
-Album detail contains `id`, `title`, `album_type`, `artwork_url`, `released_at`, an `artists` array, and a `songs` array. `album_type` is `album`, `ep`, or `single`. Its `released_at` uses the manual album date when set, otherwise the latest release date among visible tracks. Each album artist contains `id`, `name`, `prefix_title`, and `is_group`.
+Album detail has `id`, `title`, `album_type`, `artwork_url`, `released_at`, an `artists` array, and a `songs` array. `album_type` is `album`, `ep`, or `single`. `released_at` is the manual album date if set. Otherwise it is the latest release date among visible tracks. Each album artist has `id`, `name`, `prefix_title`, and `is_group`.
 
-Each album track is a song card plus `position`, `date_type`, `duration_ms`, and `youtube_duration_seconds`. `duration_ms` is the manually-entered track length; `youtube_duration_seconds` is the auto-fetched YouTube length, used as a fallback when `duration_ms` is `null`.
+Each album track is a song card plus `position`, `date_type`, `duration_ms`, and `youtube_duration_seconds`. `duration_ms` is the manually entered length. `youtube_duration_seconds` is the fetched YouTube length, used when `duration_ms` is `null`.
 
 A song's album membership (`/v1/songs/{songId}/albums`) contains `id`, `title`, `artwork_url`, and the track `position`.
 
@@ -460,6 +460,6 @@ Unknown routes return `404` and include a message pointing you to `GET /v1`. The
 
 ## Versioning
 
-Use the `/v1` prefix in production integrations. Backward-compatible fields and routes may be added. Treat existing fields and route behavior as stable within the version, and handle unknown response fields without failing.
+Use the `/v1` prefix in production. New backward-compatible fields and routes may be added. Existing fields and behavior stay stable within the version. Ignore unknown response fields instead of failing.
 
 The API is intentionally read-only. For contributions, account features, and authenticated workflows, direct users to [diskograf.com](https://diskograf.com).

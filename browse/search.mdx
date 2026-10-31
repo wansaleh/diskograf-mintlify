@@ -4,20 +4,20 @@ sidebarTitle: "Search"
 description: "Master Diskograf's search syntax to find Malaysian music using plain text and structured filters for artist, label, year, and decade."
 ---
 
-Diskograf's search is designed to get you to the right song, artist, or label as quickly as possible — whether you know exactly what you're looking for or you're exploring from a half-remembered phrase. A plain text search is enough to get started, and a set of structured filters lets you narrow results with precision when you need it.
+Search finds songs, artists, and labels fast. Plain text is enough to start. Filters narrow your results when you need precision.
 
 ## Basic Search
 
-Type any word or phrase into the search bar to search across song titles in the catalogue. You don't need to know an exact title — partial matches work, and results are ranked so the most relevant entries appear first.
+Type a word or phrase in the search bar to search song titles. Partial matches work. The most relevant results come first.
 
-Search ranking takes two signals into account:
+Ranking uses two signals:
 
-- **Catalogue importance** — songs with richer credit data and broader catalogue coverage rank higher.
-- **YouTube activity** — songs with stronger engagement on YouTube surface more prominently, helping popular and well-known tracks appear where you'd expect them.
+- **Catalogue importance**: songs with more credit data rank higher.
+- **YouTube activity**: songs with more YouTube engagement rank higher.
 
 ## Search Filters
 
-Filters let you scope your search beyond song titles. Each filter has a full-length form and a single-letter shorthand — both work identically.
+Filters search beyond song titles. Each filter has a full form and a one-letter shorthand. Both work the same.
 
 | Filter | Shorthand | Example | What it does |
 |---|---|---|---|
@@ -29,23 +29,23 @@ Filters let you scope your search beyond song titles. Each filter has a full-len
 
 ### Artist name matching
 
-Artist filters support partial name matching and resolve known aliases automatically. If an artist is catalogued under multiple names, any of their aliases will match.
+Artist filters match partial names and known aliases. If an artist has several names, any of them matches.
 
 ### Label name matching
 
-Label filters also support partial matching — you don't need to type the full company name. `label:rocket` will match Rocketfuel Entertainment Sdn Bhd without requiring the complete string.
+Label filters also match partial names. `label:rocket` matches Rocketfuel Entertainment Sdn Bhd.
 
 ## Combining Filters
 
-You can combine plain text with any number of filters in a single search query. Write the filters anywhere in the query — order doesn't matter.
+You can mix plain text with any number of filters. Order does not matter.
 
 ```text
 cinta artist:siti decade:2000
 ```
 
-This example returns songs with "cinta" in the title, performed by an artist matching "siti", released during the 2000s.
+This returns 2000s songs with "cinta" in the title by an artist matching "siti".
 
-A few more examples to show the range of what's possible:
+More examples:
 
 ```text
 artist:"faizal tahir" year:2008
@@ -59,18 +59,18 @@ label:rocketfuel decade:1990
 wings label:padu
 ```
 
-There's no limit on how many filters you combine — stack as many as you need to zero in on exactly what you're looking for.
+There is no limit on the number of filters.
 
 ## Search Tips
 
 <AccordionGroup>
   <Accordion title="My search returned no results">
-    Try the following steps in order:
+    Try these steps in order:
 
-    1. **Remove filters one at a time.** A combination like `year:2005 label:sony artist:ella` may be too specific. Remove the most restrictive filter first and see if results appear.
-    2. **Check your spelling.** Partial matches help, but a typo in the first few characters can prevent a match entirely.
-    3. **Try a shorter search term.** Instead of a full title, try the most distinctive single word from it.
-    4. **Try the artist filter alone.** If you're confident about the artist, searching `artist:name` on its own will show their full catalogue, and you can scan from there.
+    1. **Remove filters one at a time.** `year:2005 label:sony artist:ella` may be too narrow. Remove the strictest filter first.
+    2. **Check your spelling.** A typo in the first few letters can block a match.
+    3. **Use a shorter term.** Try the most distinctive word from the title.
+    4. **Use the artist filter alone.** `artist:name` shows the artist's full catalogue.
   </Accordion>
   <Accordion title="How do I search for a multi-word artist name?">
     Wrap the name in double quotes:
@@ -79,36 +79,36 @@ There's no limit on how many filters you combine — stack as many as you need t
     artist:"faizal tahir"
     ```
 
-    Without quotes, each word is treated as an independent search token. `artist:faizal tahir` would filter by an artist matching "faizal" and also include the plain text term "tahir" — which is probably not what you want.
+    Without quotes, each word is a separate term. `artist:faizal tahir` filters by "faizal" and adds "tahir" as plain text.
 
-    The same rule applies to multi-word label names:
+    Multi-word label names work the same way:
 
     ```text
     label:"suria records"
     ```
   </Accordion>
   <Accordion title="Can I search by decade instead of an exact year?">
-    Yes. Use the `decade:` filter (shorthand `d:`) with the opening year of the decade:
+    Yes. Use `decade:` (shorthand `d:`) with the first year of the decade:
 
     ```text
     decade:1980
     ```
 
-    This returns all songs released between 1980 and 1989 inclusive. It's especially useful when you remember the era but not the exact year of a release.
+    This returns songs from 1980 to 1989. It helps when you know the era but not the year.
 
-    You can combine it with other filters as normal:
+    You can combine it with other filters:
 
     ```text
     artist:m.nasir decade:1990
     ```
   </Accordion>
   <Accordion title="Why do some artists appear higher in results?">
-    Diskograf ranks search results using two signals: **catalogue importance** (how complete and well-documented a song or artist's record is) and **YouTube activity** (engagement and view counts on associated videos). Well-documented artists with active YouTube presence will tend to rank higher than entries with sparse data, even if both are a textual match for your query.
+    Ranking uses **catalogue importance**, meaning how complete a record is. It also uses **YouTube activity**, meaning views and engagement. Well-documented artists with active YouTube channels rank higher than sparse entries.
 
-    If you're looking for a lesser-known artist and they're not appearing prominently, try using the `artist:` filter directly rather than a plain text search — this bypasses relevance ranking and returns all matching artist entries.
+    To find a lesser-known artist, use the `artist:` filter instead of plain text. It skips relevance ranking and returns all matching artists.
   </Accordion>
 </AccordionGroup>
 
 <Note>
-  The search bar is available on every page of Diskograf. Click it or use the keyboard shortcut to open the search palette without navigating away from where you are.
+  The search bar is on every page. Click it or use the keyboard shortcut to open search without leaving the page.
 </Note>
